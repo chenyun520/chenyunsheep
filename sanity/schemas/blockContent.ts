@@ -113,17 +113,18 @@ export default defineType({
       },
     }),
     defineArrayMember({
-      type: 'code',
+      type: 'object',
       name: 'codeBlock',
       title: '代码块',
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      options: {
-        language: 'javascript', // 默认语言
-        languageDropdown: true, // 显示语言选择下拉菜单
-      },
-      // 添加文件名字段
       fields: [
+        {
+          name: 'code',
+          type: 'code',
+          title: '代码',
+          options: {
+            language: 'javascript',
+          },
+        },
         {
           name: 'filename',
           type: 'string',
@@ -131,6 +132,19 @@ export default defineType({
           description: '如果需要显示文件名，请填写',
         },
       ],
+      preview: {
+        select: {
+          code: 'code',
+          filename: 'filename',
+        },
+        prepare(selection) {
+          const { code, filename } = selection
+          return {
+            title: filename ? `${filename} 代码块` : '代码块',
+            subtitle: code ? `${typeof code === 'string' ? code.slice(0, 50) + '...' : '代码'}` : '',
+          }
+        },
+      },
     }),
   ],
 })
