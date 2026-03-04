@@ -61,9 +61,6 @@ export const postType = defineType({
       title: '阅读时长（分钟）',
       type: 'number',
       validation: (Rule) => Rule.required(),
-      options: {
-        source: 'body',
-      },
     }),
     defineField({
       name: 'mood',

@@ -1,5 +1,5 @@
 import {defineConfig} from 'sanity'
-import {structureTool} from 'sanity/structure'
+import {structure} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {postType, categoryType, blockContentType} from './simple-schemas'
 import { DocumentTextIcon, TagIcon } from '@sanity/icons'
@@ -12,7 +12,7 @@ export default defineConfig({
   dataset: 'production',
 
   plugins: [
-    structureTool({
+    structure({
       structure: (S) =>
         S.list()
           .title('Content')
