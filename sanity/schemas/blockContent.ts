@@ -116,9 +116,21 @@ export default defineType({
       type: 'code',
       name: 'codeBlock',
       title: '代码块',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       options: {
-        withFilename: true,
+        language: 'javascript', // 默认语言
+        languageDropdown: true, // 显示语言选择下拉菜单
       },
+      // 添加文件名字段
+      fields: [
+        {
+          name: 'filename',
+          type: 'string',
+          title: '文件名（可选）',
+          description: '如果需要显示文件名，请填写',
+        },
+      ],
     }),
   ],
 })

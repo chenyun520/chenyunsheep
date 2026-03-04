@@ -4,6 +4,7 @@
  * This configuration is used to for the Sanity Studio that's mounted on the `\app\studio\[[...tool]]\page.tsx` route
  */
 
+import {codeInput} from '@sanity/code-input'
 import {visionTool} from '@sanity/vision'
 import {defineConfig} from 'sanity'
 
@@ -20,6 +21,7 @@ export default defineConfig({
   schema,
   plugins: [
     visionTool({defaultApiVersion: apiVersion}),
+    codeInput(),
   ],
   structure,
 })
