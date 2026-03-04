@@ -72,7 +72,7 @@
   }
 
   .cl-breadcrumbsItem, .cl-breadcrumbsItemDivider,
-  [data-localization-key],
+  [data-lochenyunzation-key],
   .cl-fileDropAreaOuterBox *, .cl-profileSectionContent__password p {
     @apply text-zinc-400;
   }

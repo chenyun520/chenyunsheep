@@ -1,8 +1,8 @@
 import {defineConfig} from 'sanity'
+import { DocumentTextIcon, TagIcon, BriefcaseIcon } from '@sanity/icons'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
-import {postType, categoryType, blockContentType} from './simple-schemas'
-import { DocumentTextIcon, TagIcon } from '@sanity/icons'
+import {schemaTypes} from './schemaTypes'
 
 export default defineConfig({
   name: 'default',
@@ -25,12 +25,16 @@ export default defineConfig({
               .title('Categories')
               .icon(TagIcon)
               .child(S.documentTypeList('category').title('Categories')),
+            S.listItem()
+              .title('Projects')
+              .icon(BriefcaseIcon)
+              .child(S.documentTypeList('project').title('Projects')),
           ])
     }),
     visionTool(),
   ],
 
   schema: {
-    types: [postType, categoryType, blockContentType],
+    types: schemaTypes,
   },
 })

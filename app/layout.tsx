@@ -7,18 +7,18 @@ import type { Metadata, Viewport } from 'next'
 
 import { ThemeProvider } from '~/app/(main)/ThemeProvider'
 import { url } from '~/lib'
-import { zhCN } from '~/lib/clerkLocalizations'
+import { zhCN } from '~/lib/clerkLochenyunzations'
 import { sansFont } from '~/lib/font'
 import { seo } from '~/lib/seo'
 
 export const metadata: Metadata = {
   metadataBase: seo.url,
   title: {
-    template: '%s | Cali Castle',
+    template: '%s | Chenyun',
     default: seo.title,
   },
   description: seo.description,
-  keywords: 'Cali,Cali Castle,郭晓楠,佐玩,创始人,CEO,开发者,设计师,细节控,创新',
+  keywords: 'Chenyun,Chenyun,郭晓楠,佐玩,精益工程师,CEO,开发者,设计师,细节控,创新',
   manifest: '/site.webmanifest',
   robots: {
     index: true,
@@ -34,17 +34,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: {
       default: seo.title,
-      template: '%s | Cali Castle',
+      template: '%s | Chenyun',
     },
     description: seo.description,
-    siteName: 'Cali Castle',
+    siteName: 'Chenyun',
     locale: 'zh_CN',
     type: 'website',
-    url: 'https://cali.so',
+    url: 'https://chenyun.so',
   },
   twitter: {
-    site: '@thecalicastle',
-    creator: '@thecalicastle',
+    site: '@chenyun_engineer',
+    creator: '@chenyun_engineer',
     card: 'summary_large_image',
     title: seo.title,
     description: seo.description,
@@ -70,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider localization={zhCN}>
+    <ClerkProvider lochenyunzation={zhCN}>
       <html
         lang="zh-CN"
         className={`${sansFont.variable} m-0 h-full p-0 font-sans antialiased`}

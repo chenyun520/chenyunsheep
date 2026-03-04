@@ -25,32 +25,32 @@ const nextConfig = {
     return [
       {
         "source": "/twitter",
-        "destination": "https://x.com/thecalicastle",
+        "destination": "https://x.com/chenyun_engineer",
         "permanent": true
       },
       {
         "source": "/x",
-        "destination": "https://x.com/thecalicastle",
+        "destination": "https://x.com/chenyun_engineer",
         "permanent": true
       },
       {
         "source": "/youtube",
-        "destination": "https://youtube.com/@calicastle",
+        "destination": "https://youtube.com/@chenyun_engineer",
         "permanent": true
       },
       {
         "source": "/tg",
-        "destination": "https://t.me/cali_so",
+        "destination": "https://t.me/chenyun_engineer",
         "permanent": true
       },
       {
         "source": "/linkedin",
-        "destination": "https://www.linkedin.com/in/calicastle/",
+        "destination": "https://www.linkedin.com/in/chenyun-engineer",
         "permanent": true
       },
       {
         "source": "/github",
-        "destination": "https://github.com/CaliCastle",
+        "destination": "https://github.com/chenyun-engineer",
         "permanent": true
       },
       {

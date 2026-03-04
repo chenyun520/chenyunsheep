@@ -1,10 +1,10 @@
 export const seo = {
-  title: 'Cali Castle | 开发者、设计师、细节控、创始人',
+  title: 'Chenyun | 精益工程师、开发者、设计师、细节控',
   description:
-    '我叫 Cali，一名开发者，设计师，细节控，同时也是佐玩创始人，目前带领着佐玩致力于创造一个充满创造力的工作环境，同时鼓励团队创造影响世界的产品。',
+    '我叫 Chenyun，一名精益工程师、开发者、设计师、细节控，致力于通过精益方法论创造高质量的产品和工作环境。',
   url: new URL(
     process.env.NODE_ENV === 'production'
-      ? 'https://cali.so'
+      ? 'https://chenyun.so'
       : 'http://localhost:3000'
   ),
 } as const
