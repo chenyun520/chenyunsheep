@@ -13,13 +13,21 @@ const nextConfig = {
         hostname: 'cdn.sanity.io',
         port: '',
         pathname: `/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/**`,
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cherishbloom.top',
+      },
     ],
+    unoptimized: true, // Cloudflare Pages 需要
   },
 
   experimental: {
     taint: true,
   },
+
+  // Cloudflare Pages 支持
+  output: 'standalone',
 
   redirects() {
     return [
