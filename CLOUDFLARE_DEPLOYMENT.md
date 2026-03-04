@@ -16,8 +16,9 @@
 
 3. **配置构建设置**
    ```
-   Build command: pnpm turbo build
-   Build output directory: .next
+   Framework preset: Next.js
+   Build command: npx @cloudflare/next-on-pages@1
+   Build output directory: .vercel/output/static
    Root directory: (留空)
    ```
 
@@ -33,7 +34,10 @@
    UPSTASH_REDIS_REST_TOKEN=你的token
    ```
 
-5. **配置自定义域名**
+5. **Node.js 版本**
+   - 设置 Node.js 版本为 `20` 或更高
+
+6. **配置自定义域名**
    - 在项目设置中添加 `cali.so`
    - 按照 Cloudflare 指引配置 DNS 记录
 

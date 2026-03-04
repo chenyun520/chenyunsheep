@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:cloudflare": "npx @cloudflare/next-on-pages@1",
     "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg",
     "dev": "next dev",
     "dev:email": "email dev -p 3333",
     "dev:turbo": "next dev --turbo",
     "lint": "next lint",
+    "preview": "npx wrangler pages dev .vercel/output/static",
     "start": "next start"
   },
   "dependencies": {
@@ -83,6 +85,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@headlessui/tailwindcss": "^0.2.0",
     "@tailwindcss/typography": "^0.5.10",
     "@types/eslint": "^8.56.5",
@@ -107,6 +110,7 @@
     "prettier-plugin-tailwindcss": "^0.5.12",
     "tailwindcss": "^3.4.1",
     "turbo": "^1.12.5",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "wrangler": "^3.114.17"
   }
 }
