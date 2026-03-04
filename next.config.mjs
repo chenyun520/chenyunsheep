@@ -19,15 +19,11 @@ const nextConfig = {
         hostname: '**.cherishbloom.top',
       },
     ],
-    unoptimized: true, // Cloudflare Pages 需要
   },
 
   experimental: {
     taint: true,
   },
-
-  // Cloudflare Pages 支持
-  output: 'standalone',
 
   redirects() {
     return [
@@ -53,7 +49,7 @@ const nextConfig = {
       },
       {
         "source": "/linkedin",
-        "destination": "https://www.linkedin.com/in/chenyun-engineer",
+        "destination": "https://www.linkedin.com/in/chenyun_engineer",
         "permanent": true
       },
       {

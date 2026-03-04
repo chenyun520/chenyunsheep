@@ -4,14 +4,12 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:cloudflare": "npx @cloudflare/next-on-pages@1",
     "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg",
     "dev": "next dev",
     "dev:email": "email dev -p 3333",
     "dev:turbo": "next dev --turbo",
     "lint": "next lint",
-    "preview": "npx wrangler pages dev .vercel/output/static",
     "start": "next start"
   },
   "dependencies": {
