@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     siteName: 'Chenyun',
     locale: 'zh_CN',
     type: 'website',
-    url: 'https://chenyun.so',
+    url: 'https://www.cherishbloom.top',
   },
   twitter: {
     site: '@chenyun_engineer',
