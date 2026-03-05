@@ -68,19 +68,18 @@ export default async function BlogPage({
   let reactions: number[] = [0, 0, 0, 0]
   try {
     const res = await fetch(url(`/api/reactions?id=${post._id}`), {
-      next: {
-        revalidate: 60,
-      },
+      cache: 'no-store',
     })
     if (res.ok) {
       const data = await res.json()
       if (Array.isArray(data) && data.length === 4) {
         reactions = data
       }
+    } else {
+      console.warn('Reactions API returned non-ok status:', res.status)
     }
   } catch (error) {
     console.error('Failed to fetch reactions:', error)
-    reactions = [12, 8, 5, 3] // 开发环境显示模拟数据
   }
 
   let relatedViews: number[] = []
