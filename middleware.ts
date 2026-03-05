@@ -67,7 +67,5 @@ export default authMiddleware({
     '/rss',
     '/feed',
     '/ama',
-    '/sign-in(.*)',
-    '/sign-up(.*)',
   ],
 })
