@@ -4,7 +4,6 @@ import { LayoutGroup, motion } from 'framer-motion'
 import React from 'react'
 
 import { UsersIcon } from '~/assets'
-
 import { ClerkUserStats } from '~/components/ClerkUserStats'
 import { TextRotate } from '~/components/fancy/text/text-rotate'
 
