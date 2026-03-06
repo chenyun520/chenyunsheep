@@ -132,3 +132,53 @@ export const getSettings = () =>
         }[]
       | null
   }>(getSettingsQuery())
+
+export const getAllCategoriesQuery = groq`
+  *[_type == "category"] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description
+  }
+`
+
+export const getAllCategories = () =>
+  client.fetch<
+    {
+      _id: string
+      title: string
+      slug: string
+      description?: string
+    }[]
+  >(getAllCategoriesQuery)
+
+export const getBlogPostsByCategoryQuery = (
+  categorySlug: string,
+  limit = 20
+) =>
+  groq`
+  *[_type == "post" && !(_id in path("drafts.**")) && publishedAt <= "${getDate().toISOString()}"
+  && defined(slug.current) && *[_type == "category" && slug.current == $categorySlug][0]._id in categories[]._ref] | order(publishedAt desc)[0...${limit}] {
+    _id,
+    title,
+    "slug": slug.current,
+    "categories": categories[]->title,
+    description,
+    publishedAt,
+    readingTime,
+    mainImage {
+      _ref,
+      asset->{
+        url,
+        "lqip": metadata.lqip,
+        "dominant": metadata.palette.dominant
+      }
+    }
+  }
+`
+
+export const getBlogPostsByCategory = (categorySlug: string, limit = 20) =>
+  client.fetch<Post[]>(
+    getBlogPostsByCategoryQuery(categorySlug, limit),
+    { categorySlug }
+  )

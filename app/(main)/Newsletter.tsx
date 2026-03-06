@@ -1,137 +1,74 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import va from '@vercel/analytics'
-import { clsxm } from '@zolplay/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { LayoutGroup, motion } from 'framer-motion'
 import React from 'react'
-import { useForm } from 'react-hook-form'
-import { useReward } from 'react-rewards'
-import { z } from 'zod'
 
-import { TiltedSendIcon } from '~/assets'
-import { Button } from '~/components/ui/Button'
+import { UsersIcon } from '~/assets'
 
-const formId = '5108903'
+import { ClerkUserStats } from '~/components/ClerkUserStats'
+import { TextRotate } from '~/components/fancy/text/text-rotate'
 
-export const newsletterFormSchema = z.object({
-  email: z.string().email({ message: '邮箱地址不正确' }).nonempty(),
-  formId: z.string().nonempty(),
-})
-export type NewsletterForm = z.infer<typeof newsletterFormSchema>
-
-export function Newsletter({ subCount }: { subCount?: string }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<NewsletterForm>({
-    defaultValues: { formId },
-    resolver: zodResolver(newsletterFormSchema),
-  })
-  const [isSubscribed, setIsSubscribed] = React.useState(false)
-  const { reward } = useReward('newsletter-rewards', 'emoji', {
-    position: 'absolute',
-    emoji: ['🤓', '😊', '🥳', '🤩', '🤪', '🤯', '🥰', '😎', '🤑', '🤗', '😇'],
-    elementCount: 32,
-  })
-  const onSubmit = React.useCallback(
-    async (data: NewsletterForm) => {
-      try {
-        if (isSubmitting) return
-
-        va.track('Newsletter:Subscribe')
-
-        const response = await fetch('/api/newsletter', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ data }),
-        })
-        if (response.ok) {
-          reset()
-          reward()
-          setIsSubscribed(true)
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    },
-    [isSubmitting, reset, reward]
-  )
-
-  React.useEffect(() => {
-    if (isSubscribed) {
-      setTimeout(() => setIsSubscribed(false), 60000)
-    }
-  }, [isSubscribed])
-
+export function Newsletter({ _subCount }: { _subCount?: string }) {
   return (
-    <form
-      className={clsxm(
-        'relative rounded-2xl border border-zinc-100 p-6 transition-opacity dark:border-zinc-700/40',
-        isSubmitting && 'pointer-events-none opacity-70'
-      )}
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <input type="hidden" className="hidden" {...register('formId')} />
-      <h2 className="flex items-center text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-        <TiltedSendIcon className="h-5 w-5 flex-none" />
-        <span className="ml-2">动态更新</span>
-      </h2>
-      <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400 md:text-sm">
-        <span>喜欢我的内容的话不妨订阅支持一下 🫶</span>
-        <br />
-        {subCount && (
-          <span>
-            加入其他 <span className="font-medium">{subCount}</span> 位订阅者，
-          </span>
-        )}
-        <span>每月一封，随时可以取消订阅。</span>
-      </p>
-      <AnimatePresence mode="wait">
-        {!isSubscribed ? (
-          <motion.div
-            className="mt-6 flex h-10"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit="initial"
-          >
-            <input
-              type="email"
-              placeholder="你的邮箱"
-              aria-label="电子邮箱"
-              required
-              className="min-w-0 flex-auto appearance-none rounded-lg border border-zinc-900/10 bg-white px-3 py-[calc(theme(spacing.2)-1px)] placeholder:text-zinc-400 focus:border-lime-500 focus:outline-none focus:ring-4 focus:ring-lime-500/10 dark:border-zinc-700 dark:bg-zinc-700/[0.15] dark:text-zinc-200 dark:placeholder:text-zinc-500 dark:focus:border-lime-400/50 dark:focus:ring-lime-400/5 sm:text-sm"
-              {...register('email')}
+    <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-16 lg:gap-24">
+      {/* 左侧：社区统计 */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40 flex flex-col justify-center flex-shrink-0"
+      >
+        <div className="flex items-center text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <UsersIcon className="h-5 w-5 flex-none" />
+          <span className="ml-2">社区</span>
+        </div>
+
+        <ClerkUserStats
+          fallback={
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+              加载中...
+            </p>
+          }
+          render={(users, totalUsers) => (
+            <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+              加入 <span className="font-semibold text-zinc-900 dark:text-zinc-100">{totalUsers}</span> 位开发者
+              一起探索技术与创新
+            </p>
+          )}
+        />
+      </motion.div>
+
+      {/* 右侧：动画效果 */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="relative rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40 flex items-center justify-center overflow-hidden flex-shrink-0"
+      >
+        <LayoutGroup>
+          <div className="flex whitespace-pre text-lg sm:text-xl md:text-2xl font-light items-center">
+            <span className="text-zinc-700 dark:text-zinc-300">
+              Make it{' '}
+            </span>
+            <TextRotate
+              texts={[
+                'hares',
+                'right',
+                'fast',
+              ]}
+              mainClassName="text-white px-3 py-1.5 bg-gradient-to-r from-lime-500 to-emerald-500 overflow-hidden justify-center rounded-lg font-semibold inline-flex items-center"
+              staggerFrom="last"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-120%' }}
+              staggerDuration={0.025}
+              splitLevelClassName="overflow-hidden inline-block"
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+              rotationInterval={2000}
             />
-            <Button
-              type="submit"
-              className="ml-2 flex-none"
-              disabled={isSubmitting}
-            >
-              订阅
-            </Button>
-          </motion.div>
-        ) : (
-          <motion.p
-            className="mt-6 h-10 text-center text-lg text-zinc-700 dark:text-zinc-300"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit="initial"
-          >
-            请查收订阅确认邮件 🥳
-          </motion.p>
-        )}
-      </AnimatePresence>
-      <span id="newsletter-rewards" className="relative h-0 w-0" />
-      {errors.email && (
-        <p className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">
-          {errors.email.message}
-        </p>
-      )}
-    </form>
+          </div>
+        </LayoutGroup>
+      </motion.div>
+    </div>
   )
 }

@@ -1,9 +1,11 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import React from 'react'
 import Balancer from 'react-wrap-balancer'
 
 import { SparkleIcon, UserSecurityIcon } from '~/assets'
+import { BreathingText } from '~/components/fancy/text/breathing-text'
 import { SocialLink } from '~/components/links/SocialLink'
 
 function Developer() {
@@ -49,8 +51,44 @@ function Founder() {
 }
 
 export function Headline() {
+  const [copied, setCopied] = React.useState(false)
+  const email = 'gaolujie26@gmail.com'
+
+  const handleEmailClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      void navigator.clipboard.writeText(email).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+    },
+    [email]
+  )
+
   return (
     <div className="max-w-2xl">
+      {/* 呼吸动画文字 - 标题上方 */}
+      <motion.div
+        className="mb-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: 'spring',
+          damping: 25,
+          stiffness: 100,
+          duration: 0.4,
+        }}
+      >
+        <BreathingText
+          staggerDuration={0.08}
+          fromFontVariationSettings="'wght' 100, 'slnt' 0"
+          toFontVariationSettings="'wght' 800, 'slnt' -10"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-zinc-500 dark:text-zinc-400"
+        >
+          chenyun-sheep
+        </BreathingText>
+      </motion.div>
+
       <motion.h1
         className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-5xl"
         initial={{ opacity: 0, y: 30 }}
@@ -118,11 +156,36 @@ export function Headline() {
           aria-label="我的 Telegram"
           platform="telegram"
         />
-        <SocialLink
-          href="mailto:gaolujie26@gmail.com"
-          aria-label="我的邮箱"
-          platform="mail"
-        />
+        <button
+          onClick={handleEmailClick}
+          aria-label="复制我的邮箱"
+          className="relative group"
+        >
+          <div className="absolute inset-0 bg-lime-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <svg
+            className="h-6 w-6 text-zinc-500 hover:text-lime-500 dark:text-zinc-400 dark:hover:text-lime-400 transition-colors relative z-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+            />
+          </svg>
+          {copied && (
+            <motion.span
+              className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-1 bg-zinc-900 text-white text-xs rounded-md"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 5 }}
+            >
+              已复制
+            </motion.span>
+          )}
+        </button>
       </motion.div>
     </div>
   )
