@@ -41,7 +41,7 @@ export const getLatestBlogPostsQuery = ({
         url,
         ${
           forDisplay
-            ? '"lqip": coalesce(metadata.lqip, ""), "dominant": coalesce(metadata.palette.dominant, { background: "#000000", foreground: "#ffffff" }),'
+            ? '"lqip": metadata.lqip, "dominant": metadata.palette.dominant,'
             : ''
         }
       }
@@ -64,7 +64,7 @@ export const getBlogPostQuery = groq`
       ...,
       _type == "image" => {
         "url": asset->url,
-        "lqip": coalesce(asset->metadata.lqip, ""),
+        "lqip": asset->metadata.lqip,
         "dimensions": asset->metadata.dimensions,
         ...
       }
@@ -74,8 +74,8 @@ export const getBlogPostQuery = groq`
       _ref,
       asset->{
         url,
-        "lqip": coalesce(metadata.lqip, ""),
-        "dominant": coalesce(metadata.palette.dominant, { background: "#000000", foreground: "#ffffff" })
+        "lqip": metadata.lqip,
+        "dominant": metadata.palette.dominant
       }
     },
     "related": *[_type == "post" && slug.current != $slug && count(categories[@._ref in ^.^.categories[]._ref]) > 0] | order(publishedAt desc, _createdAt desc) [0..2] {
@@ -89,8 +89,8 @@ export const getBlogPostQuery = groq`
         _ref,
         asset->{
           url,
-          "lqip": coalesce(metadata.lqip, ""),
-          "dominant": coalesce(metadata.palette.dominant, { background: "#000000", foreground: "#ffffff" })
+          "lqip": metadata.lqip,
+          "dominant": metadata.palette.dominant
         }
       },
     }
@@ -118,7 +118,7 @@ export const getSettingsQuery = () =>
       end,
       "logo": logo.asset->url
     }
-}`
+  }`
 export const getSettings = () =>
   client.fetch<{
     projects: Project[] | null
@@ -171,8 +171,8 @@ export const getBlogPostsByCategoryQuery = (
       _ref,
       asset->{
         url,
-        "lqip": coalesce(metadata.lqip, ""),
-        "dominant": coalesce(metadata.palette.dominant, { background: "#000000", foreground: "#ffffff" })
+        "lqip": metadata.lqip,
+        "dominant": metadata.palette.dominant
       }
     }
   }

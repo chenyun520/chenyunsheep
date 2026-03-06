@@ -12,12 +12,13 @@ export const Post = z.object({
     _ref: z.string(),
     asset: z.object({
       url: z.string(),
-      lqip: z.string().optional(),
+      lqip: z.string().nullable().optional(),
       dominant: z
         .object({
           background: z.string(),
           foreground: z.string(),
         })
+        .nullable()
         .optional(),
     }),
   }),
