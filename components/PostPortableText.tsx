@@ -36,9 +36,14 @@ const components: PortableTextComponents = {
 
   marks: {
     link: ({ children, value }) => {
-      const rel = !value.href.startsWith('/')
-        ? 'noreferrer noopener'
-        : undefined
+      // Defensive: value or value.href may be undefined for malformed link marks
+      // Prevent runtime errors in the client by falling back to rendering
+      // the children as plain text when href is not present or not a string.
+      if (!value || typeof value.href !== 'string' || value.href.length === 0) {
+        return <>{children}</>
+      }
+
+      const rel = !value.href.startsWith('/') ? 'noreferrer noopener' : undefined
       return (
         <PeekabooLink href={value.href} rel={rel}>
           {children}

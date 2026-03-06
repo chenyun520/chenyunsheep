@@ -14,7 +14,7 @@ export const generateMetadata = async ({
   params: { slug: string }
 }) => {
   const post = await getBlogPost(params.slug)
-  if (!post) {
+  if (!post || !post.mainImage?.asset?.url) {
     notFound()
   }
 
@@ -54,7 +54,21 @@ export default async function BlogPage({
   params: { slug: string }
 }) {
   const post = await getBlogPost(params.slug)
+
+  // 添加详细日志用于调试
   if (!post) {
+    console.error('[BlogPage] Post not found for slug:', params.slug)
+    notFound()
+  }
+
+  // 验证必要字段
+  if (!post.mainImage?.asset?.url) {
+    console.error('[BlogPage] Post missing mainImage:', post._id, post.title)
+    notFound()
+  }
+
+  if (!post.body || post.body.length === 0) {
+    console.error('[BlogPage] Post missing body content:', post._id, post.title)
     notFound()
   }
 

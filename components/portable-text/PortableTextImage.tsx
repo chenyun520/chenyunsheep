@@ -15,7 +15,7 @@ export function PortableTextImage({
 }: PortableTextComponentProps<{
   _key: string
   url: string
-  dimensions: {
+  dimensions?: {
     width: number
     height: number
   }
@@ -29,6 +29,9 @@ export function PortableTextImage({
     [value.label]
   )
 
+  // 安全的默认尺寸
+  const dimensions = value.dimensions || { width: 1200, height: 675 }
+
   return (
     <div data-blockid={value._key} className="group relative pr-3 md:pr-0">
       <ClientOnly>
@@ -40,8 +43,8 @@ export function PortableTextImage({
           <div
             className="relative"
             style={{
-              width: value.dimensions.width,
-              height: value.dimensions.height,
+              width: dimensions.width,
+              height: dimensions.height,
             }}
           />
         )}
@@ -57,8 +60,8 @@ export function PortableTextImage({
                 <Dialog.Trigger>
                   <Image
                     src={value.url}
-                    width={value.dimensions.width}
-                    height={value.dimensions.height}
+                    width={dimensions.width}
+                    height={dimensions.height}
                     placeholder={value.lqip ? 'blur' : 'empty'}
                     blurDataURL={value.lqip}
                     className={clsxm(
@@ -109,8 +112,8 @@ export function PortableTextImage({
                       >
                         <Image
                           src={value.url}
-                          width={value.dimensions.width}
-                          height={value.dimensions.height}
+                          width={dimensions.width}
+                          height={dimensions.height}
                           placeholder={value.lqip ? 'blur' : 'empty'}
                           blurDataURL={value.lqip}
                           className="mx-auto h-full overflow-hidden object-contain"
