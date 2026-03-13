@@ -57,17 +57,6 @@ export default authMiddleware({
   publicRoutes: [
     '/',
     '/studio(.*)',
-    // 完全公开的 API 路由 (不需要任何认证)
-    '/api/clerk-users',
-    '/api/activity',
-    '/api/link-preview',
-    '/api/reactions',
-    '/api/tweet/(.*)',
-    '/api/favicon',
-    '/api/newsletter',
-    // 注意: /api/guestbook 和 /api/comments 不在公开路由中
-    // 它们的 GET 是公开的，但 POST 需要认证
-    // Clerk 会注入 auth 信息，API 路由内部处理认证检查
     '/blog(.*)',
     '/confirm(.*)',
     '/projects',
@@ -77,5 +66,13 @@ export default authMiddleware({
     '/rss',
     '/feed',
     '/ama',
+    // 公开的 API 路由 (只读)
+    '/api/clerk-users',
+    '/api/activity',
+    '/api/link-preview',
+    '/api/reactions',
+    '/api/tweet/(.*)',
+    '/api/favicon',
+    '/api/newsletter',
   ],
 })

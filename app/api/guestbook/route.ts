@@ -1,4 +1,4 @@
-import { auth, currentUser } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs'
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -42,19 +42,14 @@ export async function POST(req: NextRequest) {
   // 使用 auth() 获取认证状态
   const { userId } = auth()
 
+  console.log('[guestbook] POST - userId:', userId)
+
   if (!userId) {
-    console.log('[guestbook] No userId from auth()')
+    console.log('[guestbook] No userId - returning 401')
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  // 获取完整用户信息
-  const user = await currentUser()
-  if (!user) {
-    console.log('[guestbook] No user from currentUser()')
-    return NextResponse.json({ error: 'User not found' }, { status: 401 })
-  }
-
-  const { success } = await ratelimit.limit(getKey(user.id))
+  const { success } = await ratelimit.limit(getKey(userId))
   if (!success) {
     return new Response('Too Many Requests', {
       status: 429,
@@ -66,28 +61,33 @@ export async function POST(req: NextRequest) {
     const { message } = SignGuestbookSchema.parse(data)
 
     const guestbookData = {
-      userId: user.id,
+      userId,
       message,
       userInfo: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        imageUrl: user.imageUrl || null,
+        firstName: null,
+        lastName: null,
+        imageUrl: null,
       },
     }
 
     if (env.NODE_ENV === 'production' && env.SITE_NOTIFICATION_EMAIL_TO) {
-      await resend.emails.send({
-        from: emailConfig.from,
-        to: env.SITE_NOTIFICATION_EMAIL_TO,
-        subject: '👋 有人刚刚在留言墙留言了',
-        react: NewGuestbookEmail({
-          link: url(`/guestbook`).href,
-          userFirstName: user.firstName,
-          userLastName: user.lastName,
-          userImageUrl: user.imageUrl || undefined,
-          commentContent: message,
-        }),
-      })
+      try {
+        await resend.emails.send({
+          from: emailConfig.from,
+          to: env.SITE_NOTIFICATION_EMAIL_TO,
+          subject: '👋 有人刚刚在留言墙留言了',
+          react: NewGuestbookEmail({
+            link: url(`/guestbook`).href,
+            userFirstName: null,
+            userLastName: null,
+            userImageUrl: undefined,
+            commentContent: message,
+          }),
+        })
+      } catch (emailError) {
+        console.error('[guestbook] Email send error:', emailError)
+        // 继续执行，不因为邮件失败而中断
+      }
     }
 
     const [newGuestbook] = await db
@@ -96,6 +96,8 @@ export async function POST(req: NextRequest) {
       .returning({
         newId: guestbook.id,
       })
+
+    console.log('[guestbook] POST success - id:', newGuestbook.newId)
 
     return NextResponse.json(
       {
@@ -108,7 +110,7 @@ export async function POST(req: NextRequest) {
       }
     )
   } catch (error) {
-    console.error('[guestbook] Error:', error)
-    return NextResponse.json({ error }, { status: 400 })
+    console.error('[guestbook] POST error:', error)
+    return NextResponse.json({ error: 'Failed to create message' }, { status: 500 })
   }
 }

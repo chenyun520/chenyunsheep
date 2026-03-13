@@ -65,6 +65,7 @@ export function GuestbookInput() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 确保发送 cookies
         body: JSON.stringify({
           message,
         }),
