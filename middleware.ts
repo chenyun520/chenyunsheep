@@ -57,6 +57,7 @@ export default authMiddleware({
   publicRoutes: [
     '/',
     '/studio(.*)',
+    '/api(.*)',
     '/blog(.*)',
     '/confirm(.*)',
     '/projects',
@@ -66,16 +67,5 @@ export default authMiddleware({
     '/rss',
     '/feed',
     '/ama',
-    // 公开的 API 路由 (只读)
-    '/api/clerk-users',
-    '/api/activity',
-    '/api/link-preview',
-    '/api/reactions',
-    '/api/tweet/(.*)',
-    '/api/favicon',
-    '/api/newsletter',
-    // 需要认证的 API 路由 (在路由处理器中手动检查)
-    '/api/guestbook',
-    '/api/comments(.*)',
   ],
 })
