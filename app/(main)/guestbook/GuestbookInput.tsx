@@ -1,6 +1,6 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
+import { useClerk, useUser } from '@clerk/nextjs'
 import { clsxm } from '@zolplay/utils'
 import {
   AnimatePresence,
@@ -26,6 +26,7 @@ const REWARDS_ID = 'guestbook-rewards'
 
 export function GuestbookInput() {
   const { user } = useUser()
+  const { openSignIn } = useClerk()
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [message, setMessage] = React.useState('')
   const [isPreviewing, setIsPreviewing] = React.useState(false)
@@ -68,6 +69,12 @@ export function GuestbookInput() {
           message,
         }),
       })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(errorData.error || `HTTP error: ${res.status}`)
+      }
+
       const data: GuestbookDto = await res.json()
       return data
     },
@@ -77,6 +84,16 @@ export function GuestbookInput() {
         setIsPreviewing(false)
         reward()
         signBook(data)
+      },
+      onError: (error: Error) => {
+        console.error('Failed to sign guestbook:', error)
+        // 如果是认证错误，引导用户重新登录
+        if (error.message.includes('401') || error.message.includes('Not authenticated')) {
+          alert('登录状态已过期，请重新登录')
+          openSignIn()
+        } else {
+          alert('发送失败: ' + error.message)
+        }
       },
     }
   )

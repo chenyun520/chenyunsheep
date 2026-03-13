@@ -26,6 +26,9 @@ function Message({
   idx: number
   length: number
 }) {
+  // 安全处理 createdAt
+  const createdAt = message.createdAt ? new Date(message.createdAt) : new Date()
+
   return (
     <li className="relative pb-8">
       {idx !== length - 1 && (
@@ -50,10 +53,10 @@ function Message({
             {parseDisplayName(message.userInfo || {})}
           </b>
           <time
-            dateTime={message.createdAt.toString()}
+            dateTime={createdAt.toISOString()}
             className="inline-flex select-none text-[12px] font-medium opacity-40"
           >
-            {dayjs(message.createdAt).locale('zh-cn').fromNow()}
+            {dayjs(createdAt).locale('zh-cn').fromNow()}
           </time>
         </div>
       </div>
