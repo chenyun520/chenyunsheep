@@ -1,4 +1,4 @@
-import { clerkClient, currentUser } from '@clerk/nextjs'
+import { clerkClient, getAuth } from '@clerk/nextjs/server'
 import { Ratelimit } from '@upstash/ratelimit'
 import { asc, eq } from 'drizzle-orm'
 import { type NextRequest, NextResponse } from 'next/server'
@@ -82,13 +82,16 @@ const CreateCommentSchema = z.object({
 })
 
 export async function POST(req: NextRequest, { params }: Params) {
-  // 使用 currentUser() 获取当前用户
-  const user = await currentUser()
+  // 使用 getAuth() 获取认证信息
+  const { userId } = getAuth(req)
 
-  if (!user) {
-    console.log('[comments] No user from currentUser()')
+  if (!userId) {
+    console.log('[comments] No userId from getAuth()')
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
+
+  // 获取用户信息
+  const user = await clerkClient.users.getUser(userId)
 
   const postId = params.id
 
@@ -135,7 +138,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         })
         .from(comments)
         .where(eq(comments.id, parentId as number))
-      if (parentUserFromDb && parentUserFromDb.userId !== user.id) {
+      if (parentUserFromDb && parentUserFromDb.userId !== userId) {
         const { primaryEmailAddressId, emailAddresses } =
           await clerkClient.users.getUser(parentUserFromDb.userId)
         const primaryEmailAddress = emailAddresses.find(

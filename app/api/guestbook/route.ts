@@ -1,4 +1,4 @@
-import { currentUser } from '@clerk/nextjs'
+import { clerkClient, getAuth } from '@clerk/nextjs/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -39,17 +39,18 @@ const SignGuestbookSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  // 使用 currentUser() 获取当前用户
-  const user = await currentUser()
+  // 使用 getAuth() 获取认证信息
+  const { userId } = getAuth(req)
 
-  console.log('[guestbook] POST - user:', user?.id)
+  console.log('[guestbook] POST - userId:', userId)
 
-  if (!user) {
-    console.log('[guestbook] No user - returning 401')
+  if (!userId) {
+    console.log('[guestbook] No userId - returning 401')
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  const userId = user.id
+  // 获取用户信息
+  const user = await clerkClient.users.getUser(userId)
 
   const { success } = await ratelimit.limit(getKey(userId))
   if (!success) {
@@ -66,9 +67,9 @@ export async function POST(req: NextRequest) {
       userId,
       message,
       userInfo: {
-        firstName: null,
-        lastName: null,
-        imageUrl: null,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
       },
     }
 
@@ -80,9 +81,9 @@ export async function POST(req: NextRequest) {
           subject: '👋 有人刚刚在留言墙留言了',
           react: NewGuestbookEmail({
             link: url(`/guestbook`).href,
-            userFirstName: null,
-            userLastName: null,
-            userImageUrl: undefined,
+            userFirstName: user.firstName,
+            userLastName: user.lastName,
+            userImageUrl: user.imageUrl,
             commentContent: message,
           }),
         })
