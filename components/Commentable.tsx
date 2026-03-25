@@ -117,6 +117,14 @@ function Root({ className, blockId }: CommentableProps) {
           parentId: blogPostState.replyingTo?.id,
         }),
       })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(
+          errorData.error || `HTTP error! status: ${res.status}`
+        )
+      }
+
       const data: CommentDto = await res.json()
       return data
     },
@@ -129,6 +137,17 @@ function Root({ className, blockId }: CommentableProps) {
         })
 
         window.dispatchEvent(new CustomEvent('clear-comment'))
+      },
+      onError: (err: Error) => {
+        console.error('[Commentable] Failed to create comment:', err)
+        window.dispatchEvent(
+          new CustomEvent('comment-error', {
+            detail: {
+              message: err.message || '评论发送失败，请稍后重试',
+              timestamp: Date.now(),
+            },
+          })
+        )
       },
     }
   )
@@ -439,12 +458,14 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [comment, setComment] = React.useState('')
   const [isPreviewing, setIsPreviewing] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   const { replyingTo } = useSnapshot(blogPostState)
 
   const onClickSend = React.useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
+      setErrorMessage(null)
       onSubmit?.(comment)
     },
     [onSubmit, comment]
@@ -453,6 +474,7 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && e.metaKey) {
         e.preventDefault()
+        setErrorMessage(null)
         onSubmit?.(comment)
       }
     },
@@ -462,12 +484,26 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
     const handler = () => {
       setComment('')
       setIsPreviewing(false)
+      setErrorMessage(null)
       clearReply()
     }
     window.addEventListener('clear-comment', handler)
 
     return () => {
       window.removeEventListener('clear-comment', handler)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const errorHandler = (e: Event) => {
+      if (e instanceof CustomEvent && typeof e.detail?.message === 'string') {
+        setErrorMessage(e.detail.message as string)
+      }
+    }
+    window.addEventListener('comment-error', errorHandler)
+
+    return () => {
+      window.removeEventListener('comment-error', errorHandler)
     }
   }, [])
 
@@ -505,6 +541,27 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
           </motion.header>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
+          >
+            <span className="font-semibold">发送失败:</span> {errorMessage}
+            <button
+              type="button"
+              className="ml-2 underline"
+              onClick={() => setErrorMessage(null)}
+            >
+              关闭
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex w-full items-end pb-1">
         {isPreviewing ? (
           <div className="comment__message flex-1 shrink-0 break-all px-2 py-1 text-sm text-zinc-800 dark:text-zinc-200">
