@@ -1,54 +1,60 @@
-import Image from 'next/image'
+'use client'
+
+import { motion } from 'framer-motion'
 import React from 'react'
 
-import { BriefcaseIcon } from '~/assets'
+import { BriefcaseIcon, GraduationCapIcon } from '~/assets'
 
-type Resume = {
-  company: string
-  title: string
-  start: string
-  end?: string | null
-  logo: string
-}
-
-export function Resume({ resume }: { resume: Resume[] }) {
+export function Resume() {
   return (
-    <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
-      <h2 className="flex items-center text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-        <BriefcaseIcon className="h-5 w-5 flex-none" />
-        <span className="ml-2">工作经历</span>
-      </h2>
-      <ol className="mt-6 space-y-4">
-        {resume.map((role, roleIndex) => (
-          <li key={roleIndex} className="flex gap-4">
-            <div className="relative mt-1 flex h-10 w-10 flex-none items-center justify-center rounded-full shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0">
-              <Image
-                src={role.logo}
-                alt={role.company}
-                className="h-8 w-8 rounded-full"
-                width={100}
-                height={100}
-                unoptimized
-              />
-            </div>
-            <dl className="flex flex-auto flex-wrap gap-x-2">
-              <dt className="sr-only">公司</dt>
-              <dd className="w-full flex-none text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                {role.company}
-              </dd>
-              <dt className="sr-only">职位</dt>
-              <dd className="text-xs text-zinc-500 dark:text-zinc-400">
-                {role.title}
-              </dd>
-              <dt className="sr-only">日期</dt>
-              <dd className="ml-auto text-xs text-zinc-500/80 dark:text-zinc-400/80">
-                {role.start}
-                <span aria-hidden="true">—</span> {role.end ?? '至今'}
-              </dd>
-            </dl>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <motion.div
+      className="rounded-2xl bg-gradient-to-br from-lime-50 to-emerald-50 dark:from-lime-900/20 dark:to-emerald-900/20 p-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
+      <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        个人履历
+      </h3>
+
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="mt-1 p-1.5 rounded-lg bg-lime-100 dark:bg-lime-900/40">
+            <GraduationCapIcon className="w-4 h-4 text-lime-600 dark:text-lime-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              陈云
+            </p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+              湖南科技大学
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="mt-1 p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+            <BriefcaseIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              浙江得力集团
+            </p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+              精益工程师
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-3 border-t border-zinc-200/50 dark:border-zinc-700/50">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            专注精益工程，善于将复杂问题简单化，提升工作效率
+          </p>
+        </div>
+      </div>
+    </motion.div>
   )
 }

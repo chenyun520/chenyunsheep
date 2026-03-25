@@ -9,8 +9,8 @@ import type { Project } from '~/sanity/schemas/project'
 export function ProjectCard({ project }: { project: Project }) {
   const { url, icon, name, description } = project
 
-  // Check if this is the learning certification project
   const isLearningProject = url.includes('levelcertification.pages.dev')
+  const isTrainingProject = name.includes('生产现场日常管理') || url.includes('生产现场')
 
   const iconUrl = icon ? urlFor(icon)?.size(100, 100).auto('format').url() : null
 
@@ -82,6 +82,22 @@ export function ProjectCard({ project }: { project: Project }) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
                 <span>查看项目汇报材料</span>
+              </a>
+            )}
+
+            {/* 汇报材料链接 - 仅培训项目 */}
+            {isTrainingProject && (
+              <a
+                href="/lean-academy-presentation.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span>查看培训汇报材料</span>
               </a>
             )}
 
