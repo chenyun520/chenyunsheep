@@ -41,7 +41,7 @@ export function Resume() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-              浙江得力集团
+              宁波得力集团
             </p>
             <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
               精益工程师

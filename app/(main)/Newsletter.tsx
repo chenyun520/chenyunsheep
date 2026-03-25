@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import React from 'react'
 
 import { UsersIcon } from '~/assets'
@@ -52,10 +53,11 @@ export function Newsletter({ _subCount }: { _subCount?: string }) {
                     style={{ zIndex: 4 - index }}
                   >
                     {user.image_url ? (
-                      <img
+                      <Image
                         src={user.image_url}
                         alt={user.full_name || 'User'}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       <span className="flex h-full w-full items-center justify-center text-xs font-medium text-white">
