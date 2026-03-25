@@ -46,7 +46,6 @@ export default authMiddleware({
   publicRoutes: [
     '/',
     '/studio(.*)',
-    '/api(.*)',
     '/blog(.*)',
     '/confirm(.*)',
     '/projects',
@@ -56,5 +55,8 @@ export default authMiddleware({
     '/rss',
     '/feed',
     '/ama',
+    '/api/feed',
+    '/api/rss',
+    '/api/favicon',
   ],
 })
