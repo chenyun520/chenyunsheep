@@ -5,17 +5,49 @@ import Image from 'next/image'
 import React from 'react'
 
 import { UsersIcon } from '~/assets'
+import { ClerkUserStats } from '~/components/ClerkUserStats'
 import { TextRotate } from '~/components/fancy/text/text-rotate'
 
 const FIXED_MEMBERS = 25
 
-// 模拟社区成员头像（DiceBear 生成的多样化头像）
-const AVATARS = [
-  'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Lily&backgroundColor=b6e3f4',
-  'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Max&backgroundColor=ffd5dc',
-  'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Leo&backgroundColor=c0aede',
-  'https://api.dicebear.com/7.x/fun-emoji/svg?seed=Mia&backgroundColor=d1f4d1',
+// 模拟社区成员的名字和渐变色
+const SIMULATED_USERS = [
+  { name: '小明', gradient: 'from-sky-400 to-blue-500' },
+  { name: '小红', gradient: 'from-rose-400 to-pink-500' },
+  { name: '大卫', gradient: 'from-amber-400 to-orange-500' },
+  { name: 'Luna', gradient: 'from-violet-400 to-purple-500' },
 ]
+
+function UserAvatar({ user, zIndex }: { user: { image_url?: string; full_name?: string; first_name?: string; id: string }; zIndex: number }) {
+  const initial = (user.full_name || user.first_name || '?')[0].toUpperCase()
+  return (
+    <div
+      className="relative h-8 w-8 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 overflow-hidden bg-gradient-to-br from-lime-400 to-emerald-500 shrink-0"
+      style={{ zIndex }}
+    >
+      {user.image_url ? (
+        <Image src={user.image_url} alt={user.full_name || 'User'} fill className="object-cover" />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-xs font-medium text-white">
+          {initial}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function SimulatedAvatar({ name, gradient, zIndex }: { name: string; gradient: string; zIndex: number }) {
+  return (
+    <div
+      className={`relative h-8 w-8 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 overflow-hidden bg-gradient-to-br ${gradient} shrink-0`}
+      style={{ zIndex }}
+    >
+      <span className="flex h-full w-full items-center justify-center text-xs font-medium text-white">
+        {name[0]}
+      </span>
+    </div>
+  )
+}
 
 export function Newsletter({ _subCount }: { _subCount?: string }) {
   return (
@@ -43,34 +75,48 @@ export function Newsletter({ _subCount }: { _subCount?: string }) {
           </div>
         </div>
 
-        {/* 右侧：头像 + 固定25 */}
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            {AVATARS.map((src, i) => (
-              <div
-                key={src}
-                className="relative h-8 w-8 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 overflow-hidden bg-white shrink-0"
-                style={{ zIndex: 4 - i }}
-              >
-                <Image src={src} alt="" width={32} height={32} className="object-cover" unoptimized />
-              </div>
-            ))}
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 bg-zinc-200 dark:bg-zinc-700 shrink-0">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                +{FIXED_MEMBERS - 4}
-              </span>
+        {/* 右侧：真实头像 + 固定25 */}
+        <ClerkUserStats
+          fallback={
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
+              <div className="h-4 w-20 animate-pulse rounded bg-zinc-300 dark:bg-zinc-600" />
             </div>
-          </div>
+          }
+          render={(users) => {
+            const realCount = Math.min(users.length, 4)
+            const simCount = 4 - realCount
 
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-              {FIXED_MEMBERS}
-            </span>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              members
-            </span>
-          </div>
-        </div>
+            return (
+              <div className="flex items-center gap-4">
+                <div className="flex -space-x-2">
+                  {/* 真实用户在前 */}
+                  {users.slice(0, 4).map((user, index) => (
+                    <UserAvatar key={user.id} user={user} zIndex={4 - index} />
+                  ))}
+                  {/* 模拟用户补齐 */}
+                  {SIMULATED_USERS.slice(0, simCount).map((sim, i) => (
+                    <SimulatedAvatar key={sim.name} name={sim.name} gradient={sim.gradient} zIndex={4 - realCount - i} />
+                  ))}
+                  <div className="relative flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 bg-zinc-200 dark:bg-zinc-700 shrink-0">
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                      +{FIXED_MEMBERS - 4}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                    {FIXED_MEMBERS}
+                  </span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                    members
+                  </span>
+                </div>
+              </div>
+            )
+          }}
+        />
       </motion.div>
 
       {/* 卡片二：跳动单词 */}
