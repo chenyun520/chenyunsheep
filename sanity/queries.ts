@@ -183,3 +183,30 @@ export const getBlogPostsByCategory = (categorySlug: string, limit = 20) =>
     getBlogPostsByCategoryQuery(categorySlug, limit),
     { categorySlug }
   )
+
+export const searchBlogPostsQuery = (query: string, limit = 20) =>
+  groq`
+  *[_type == "post" && !(_id in path("drafts.**")) && publishedAt <= "${getDate().toISOString()}"
+  && defined(slug.current)
+  && (title match "*${query}*" || description match "*${query}*" || pt::text(body) match "*${query}*")
+  ] | order(publishedAt desc)[0...${limit}] {
+    _id,
+    title,
+    "slug": slug.current,
+    "categories": categories[]->title,
+    description,
+    publishedAt,
+    readingTime,
+    mainImage {
+      _ref,
+      asset->{
+        url,
+        "lqip": metadata.lqip,
+        "dominant": metadata.palette.dominant
+      }
+    }
+  }
+  `
+
+export const searchBlogPosts = (query: string, limit = 20) =>
+  client.fetch<Post[]>(searchBlogPostsQuery(query, limit))

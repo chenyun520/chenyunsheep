@@ -7,6 +7,7 @@ import { getAllCategories } from '~/sanity/queries'
 
 import { BlogCategories } from './BlogCategories'
 import { BlogPostsByCategory } from './BlogPostsByCategory'
+import { BlogSearch } from './BlogSearch'
 
 const description =
   '写博客文章是我比较喜欢的沉淀分享方式，我希望能够把好用的技术知识传递给更多的人。我比较喜欢围绕着技术为主的话题，但是也会写一些非技术的话题，比如设计、创业、游戏分享、生活随笔等等。'
@@ -27,11 +28,12 @@ export const metadata = {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string }>
+  searchParams: Promise<{ category?: string; q?: string }>
 }) {
   const params = await searchParams
   const categories = await getAllCategories()
   const selectedCategory = params.category
+  const searchQuery = params.q
 
   return (
     <Container className="mt-16 sm:mt-24">
@@ -53,16 +55,24 @@ export default async function BlogPage({
         </p>
       </header>
 
-      {/* 分类筛选器 */}
-      <Suspense fallback={<div className="h-20" />}>
-        <BlogCategories categories={categories} />
+      {/* 搜索框 */}
+      <Suspense fallback={<div className="h-12" />}>
+        <BlogSearch />
       </Suspense>
+
+      {/* 分类筛选器 - 搜索时隐藏 */}
+      {!searchQuery && (
+        <Suspense fallback={<div className="h-20" />}>
+          <BlogCategories categories={categories} />
+        </Suspense>
+      )}
 
       {/* 博客文章列表 */}
       <div className="mt-12 grid grid-cols-1 gap-6 sm:mt-20 lg:grid-cols-2 lg:gap-8">
         <Suspense fallback={<div>加载中...</div>}>
           <BlogPostsByCategory
             selectedCategory={selectedCategory}
+            searchQuery={searchQuery}
             limit={20}
           />
         </Suspense>

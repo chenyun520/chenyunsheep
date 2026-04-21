@@ -5,5 +5,5 @@ export const navigationItems = [
   { href: '/training', text: '培训' },
   { href: '/guestbook', text: '留言墙' },
   { href: '/ama', text: 'AMA 咨询' },
-  // { href: '/about', text: '关于' },
+  { href: '/about', text: '关于' },
 ]

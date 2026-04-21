@@ -23,10 +23,6 @@ function getKey(id: string) {
   return `comments:${id}`
 }
 
-function generateRequestId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-}
-
 type RatelimitResult = { success: boolean; remaining: number; reset: number }
 
 async function safeRatelimit(limitKey: string): Promise<RatelimitResult> {
@@ -42,17 +38,13 @@ async function safeRatelimit(limitKey: string): Promise<RatelimitResult> {
       remaining: result.remaining,
       reset: result.reset,
     }
-  } catch (error) {
-    console.warn('[comments] Redis ratelimit error, allowing request:', error)
+  } catch {
     return { success: true, remaining: 999, reset: Date.now() + 10000 }
   }
 }
 
 type Params = { params: { id: string } }
 export async function GET(req: NextRequest, { params }: Params) {
-  const requestId = generateRequestId()
-  console.log(`[comments][GET][${requestId}] Starting request for postId:`, params.id)
-
   try {
     const postId = params.id
 
@@ -61,13 +53,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     )
 
     if (!success) {
-      console.log(`[comments][GET][${requestId}] Rate limit exceeded. Remaining:`, remaining, 'Reset:', reset)
       return NextResponse.json(
         { error: 'Too Many Requests', retryAfter: reset },
         {
           status: 429,
           headers: {
-            'X-Request-Id': requestId,
             'X-RateLimit-Remaining': remaining.toString(),
             'X-RateLimit-Reset': reset.toString(),
           },
@@ -75,7 +65,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       )
     }
 
-    console.log(`[comments][GET][${requestId}] Querying database for postId:`, postId)
     const data = await db
       .select({
         id: comments.id,
@@ -89,8 +78,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       .where(eq(comments.postId, postId))
       .orderBy(asc(comments.createdAt))
 
-    console.log(`[comments][GET][${requestId}] Found ${data.length} comments`)
-
     const result = data.map(
       ({ id, parentId, ...rest }) =>
         ({
@@ -100,17 +87,11 @@ export async function GET(req: NextRequest, { params }: Params) {
         }) as PostIDLessCommentDto
     )
 
-    return NextResponse.json(result, {
-      headers: {
-        'X-Request-Id': requestId,
-        'X-Comments-Count': result.length.toString(),
-      },
-    })
+    return NextResponse.json(result)
   } catch (error) {
-    console.error(`[comments][GET][${requestId}] Database error:`, error)
-    console.error(`[comments][GET][${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace')
+    console.error('[comments][GET] Database error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch comments', requestId },
+      { error: 'Failed to fetch comments' },
       { status: 500 }
     )
   }
@@ -125,48 +106,24 @@ const CreateCommentSchema = z.object({
 })
 
 export async function POST(req: NextRequest, { params }: Params) {
-  const requestId = generateRequestId()
-  console.log(`[comments][POST][${requestId}] Starting request for postId:`, params.id)
-
   const { userId } = getAuth(req)
 
   if (!userId) {
-    console.log(`[comments][POST][${requestId}] No userId from getAuth()`)
     return NextResponse.json(
-      {
-        error: '登录已过期，请重新登录后留下评论',
-        code: 'AUTH_EXPIRED',
-        requestId
-      },
+      { error: '登录已过期，请重新登录后留下评论', code: 'AUTH_EXPIRED' },
       { status: 401 }
     )
   }
 
-  console.log(`[comments][POST][${requestId}] User authenticated:`, userId)
-
-  try {
-    const user = await clerkClient.users.getUser(userId)
-    console.log(`[comments][POST][${requestId}] Got user info:`, user.firstName, user.lastName)
-  } catch (error) {
-    console.error(`[comments][POST][${requestId}] Failed to get user from Clerk:`, error)
-    return NextResponse.json(
-      { error: 'Failed to get user information', requestId },
-      { status: 500 }
-    )
-  }
-
   const postId = params.id
-  console.log(`[comments][POST][${requestId}] Checking rate limit`)
 
   const { success, remaining, reset } = await safeRatelimit(getKey(postId) + `_${req.ip ?? ''}`)
   if (!success) {
-    console.log(`[comments][POST][${requestId}] Rate limit exceeded`)
     return NextResponse.json(
-      { error: 'Too Many Requests', retryAfter: reset, requestId },
+      { error: 'Too Many Requests', retryAfter: reset },
       {
         status: 429,
         headers: {
-          'X-Request-Id': requestId,
           'X-RateLimit-Remaining': remaining.toString(),
           'X-RateLimit-Reset': reset.toString(),
         },
@@ -174,35 +131,26 @@ export async function POST(req: NextRequest, { params }: Params) {
     )
   }
 
-  console.log(`[comments][POST][${requestId}] Fetching post from Sanity:`, postId)
   const post = await client.fetch<
     { slug: string; title: string; imageUrl: string } | undefined
   >(
     '*[_type == "post" && _id == $id][0]{ "slug": slug.current, title, "imageUrl": mainImage.asset->url }',
-    {
-      id: postId,
-    }
+    { id: postId }
   )
 
   if (!post) {
-    console.log(`[comments][POST][${requestId}] Post not found in Sanity`)
     return NextResponse.json(
-      { error: 'Post not found', requestId },
+      { error: 'Post not found' },
       { status: 412 }
     )
   }
 
-  console.log(`[comments][POST][${requestId}] Post found:`, post.title)
-
   try {
     const data = await req.json()
-    console.log(`[comments][POST][${requestId}] Parsing request body`)
-
     const parseResult = CreateCommentSchema.safeParse(data)
     if (!parseResult.success) {
-      console.log(`[comments][POST][${requestId}] Validation error:`, parseResult.error)
       return NextResponse.json(
-        { error: 'Invalid request data', details: parseResult.error.errors, requestId },
+        { error: 'Invalid request data', details: parseResult.error.errors },
         { status: 400 }
       )
     }
@@ -210,8 +158,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { body, parentId: hashedParentId } = parseResult.data
     const [parentId] = CommentHashids.decode(hashedParentId ?? '')
 
-    console.log(`[comments][POST][${requestId}] Inserting comment into database`)
-
+    // 只调用一次 Clerk API 获取用户信息
     const user = await clerkClient.users.getUser(userId)
     const commentData = {
       postId,
@@ -227,7 +174,6 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     if (parentId && env.NODE_ENV === 'production' && env.SITE_NOTIFICATION_EMAIL_TO) {
       try {
-        console.log(`[comments][POST][${requestId}] Sending reply notification email`)
         const [parentUserFromDb] = await db
           .select({
             userId: comments.userId,
@@ -257,11 +203,10 @@ export async function POST(req: NextRequest, { params }: Params) {
                 commentContent: body.text,
               }),
             })
-            console.log(`[comments][POST][${requestId}] Reply notification email sent`)
           }
         }
       } catch (emailError) {
-        console.error(`[comments][POST][${requestId}] Email send error:`, emailError)
+        console.error('[comments][POST] Email send error:', emailError)
       }
     }
 
@@ -272,8 +217,6 @@ export async function POST(req: NextRequest, { params }: Params) {
         newId: comments.id,
       })
 
-    console.log(`[comments][POST][${requestId}] Comment created successfully, id:`, newComment.newId)
-
     return NextResponse.json(
       {
         ...commentData,
@@ -281,18 +224,12 @@ export async function POST(req: NextRequest, { params }: Params) {
         createdAt: new Date(),
         parentId: hashedParentId,
       } satisfies CommentDto,
-      {
-        status: 201,
-        headers: {
-          'X-Request-Id': requestId,
-        },
-      }
+      { status: 201 }
     )
   } catch (error) {
-    console.error(`[comments][POST][${requestId}] Error creating comment:`, error)
-    console.error(`[comments][POST][${requestId}] Error stack:`, error instanceof Error ? error.stack : 'No stack trace')
+    console.error('[comments][POST] Error creating comment:', error)
     return NextResponse.json(
-      { error: 'Failed to create comment', requestId },
+      { error: 'Failed to create comment' },
       { status: 500 }
     )
   }

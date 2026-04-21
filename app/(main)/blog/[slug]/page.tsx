@@ -6,7 +6,12 @@ import { kvKeys } from '~/config/kv'
 import { env } from '~/env.mjs'
 import { url } from '~/lib'
 import { redis } from '~/lib/redis'
-import { getBlogPost } from '~/sanity/queries'
+import { getAllLatestBlogPostSlugs, getBlogPost } from '~/sanity/queries'
+
+export async function generateStaticParams() {
+  const slugs = await getAllLatestBlogPostSlugs()
+  return slugs.map((slug) => ({ slug }))
+}
 
 export const generateMetadata = async ({
   params,

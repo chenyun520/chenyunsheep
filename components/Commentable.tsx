@@ -10,7 +10,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useSnapshot } from 'valtio'
 
@@ -101,9 +101,9 @@ function Root({ className, blockId }: CommentableProps) {
     }, 300)
   }, [])
 
-  const { mutate: createComment, isLoading } = useMutation(
-    ['comment', postId],
-    async (comment: string) => {
+  const { mutate: createComment, isPending } = useMutation({
+    mutationKey: ['comment', postId],
+    mutationFn: async (comment: string) => {
       const res = await fetch(`/api/comments/${postId}`, {
         method: 'POST',
         headers: {
@@ -128,29 +128,27 @@ function Root({ className, blockId }: CommentableProps) {
       const data: CommentDto = await res.json()
       return data
     },
-    {
-      onSuccess: (data) => {
-        addComment(data)
+    onSuccess: (data) => {
+      addComment(data)
 
-        window.requestAnimationFrame(() => {
-          scrollToComment(data.id)
+      window.requestAnimationFrame(() => {
+        scrollToComment(data.id)
+      })
+
+      window.dispatchEvent(new CustomEvent('clear-comment'))
+    },
+    onError: (err: Error) => {
+      console.error('[Commentable] Failed to create comment:', err)
+      window.dispatchEvent(
+        new CustomEvent('comment-error', {
+          detail: {
+            message: err.message || '评论发送失败，请稍后重试',
+            timestamp: Date.now(),
+          },
         })
-
-        window.dispatchEvent(new CustomEvent('clear-comment'))
-      },
-      onError: (err: Error) => {
-        console.error('[Commentable] Failed to create comment:', err)
-        window.dispatchEvent(
-          new CustomEvent('comment-error', {
-            detail: {
-              message: err.message || '评论发送失败，请稍后重试',
-              timestamp: Date.now(),
-            },
-          })
-        )
-      },
-    }
-  )
+      )
+    },
+  })
   const onSubmit = React.useCallback(
     (e?: React.FormEvent<HTMLFormElement> | string) => {
       let comment = ''
@@ -295,14 +293,14 @@ function Root({ className, blockId }: CommentableProps) {
                   <form
                     className={clsxm(
                       'flex flex-col gap-2 pt-2 transition-opacity',
-                      isLoading && 'pointer-events-none opacity-50'
+                      isPending && 'pointer-events-none opacity-50'
                     )}
                     ref={formRef}
                     onSubmit={onSubmit}
                   >
                     <SignedIn>
                       <CommentTextarea
-                        isLoading={isLoading}
+                        isPending={isPending}
                         onSubmit={onSubmit}
                       />
                     </SignedIn>
@@ -450,10 +448,10 @@ CommentItem.displayName = 'Commentable.CommentItem'
 Comment.displayName = 'Commentable.Comment'
 
 type CommentTextareaProps = {
-  isLoading?: boolean
+  isPending?: boolean
   onSubmit?: (comment: string) => void
 }
-function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
+function CommentTextarea({ isPending, onSubmit }: CommentTextareaProps) {
   const { user: me } = useUser()
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [comment, setComment] = React.useState('')
@@ -581,7 +579,7 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={onKeydown}
-            disabled={isLoading}
+            disabled={isPending}
             maxRows={8}
             autoFocus
           />
@@ -637,7 +635,7 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="button"
-                  disabled={isLoading}
+                  disabled={isPending}
                   onClick={() => setIsPreviewing((prev) => !prev)}
                 >
                   {isPreviewing ? (
@@ -654,7 +652,7 @@ function CommentTextarea({ isLoading, onSubmit }: CommentTextareaProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isPending}
                   onClick={onClickSend}
                 >
                   <TiltedSendIcon className="h-5 w-5 text-zinc-800 dark:text-zinc-200" />

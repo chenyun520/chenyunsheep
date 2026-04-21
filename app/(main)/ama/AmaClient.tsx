@@ -212,7 +212,7 @@ export function AmaClient() {
           ]}
           price="¥150/30分钟 · ¥300/60分钟"
           buttonText="立即预约咨询"
-          buttonHref="https://t.me/+6048587342"
+          buttonHref="https://order.cherishbloom.top/"
           accentColor="from-lime-400 to-emerald-500"
         />
 
@@ -230,7 +230,7 @@ export function AmaClient() {
           ]}
           price="根据项目需求报价"
           buttonText="联系了解详情"
-          buttonHref="https://t.me/+6048587342"
+          buttonHref="https://order.cherishbloom.top/"
           accentColor="from-cyan-400 to-blue-500"
         />
       </div>
@@ -255,22 +255,24 @@ export function AmaClient() {
           <div className="relative p-8">
             {/* 装饰按钮 */}
             <div className="flex justify-center mb-6">
-              <DecorativeButton />
+              <a href="https://order.cherishbloom.top/" target="_blank" rel="noopener noreferrer">
+                <DecorativeButton />
+              </a>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
-                href="https://t.me/+6048587342"
+                href="https://order.cherishbloom.top/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                            bg-blue-500 text-white font-medium
                            hover:bg-blue-600 transition-colors"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-                Telegram
+                立即下单
               </a>
 
               <PhoneCopyButton phone="17807368897" />

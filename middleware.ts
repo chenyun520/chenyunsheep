@@ -59,7 +59,6 @@ export default authMiddleware({
     '/api/feed',
     '/api/rss',
     '/api/favicon',
-    '/api/clerk-users',
     '/api/link-preview',
     '/api/reactions',
   ],

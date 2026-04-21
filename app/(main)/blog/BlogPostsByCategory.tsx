@@ -4,27 +4,39 @@ import { redis } from '~/lib/redis'
 import {
   getBlogPostsByCategory,
   getLatestBlogPosts,
+  searchBlogPosts,
 } from '~/sanity/queries'
 
 import { BlogPostCard } from './BlogPostCard'
 
 export async function BlogPostsByCategory({
   selectedCategory,
+  searchQuery,
   limit = 20,
 }: {
   selectedCategory?: string | null
+  searchQuery?: string | null
   limit?: number
 }) {
-  // 根据是否选择分类来获取文章
-  const posts = selectedCategory
-    ? await getBlogPostsByCategory(selectedCategory, limit)
-    : await getLatestBlogPosts({ limit, forDisplay: true })
+  // 搜索优先
+  let posts
+  if (searchQuery) {
+    posts = await searchBlogPosts(searchQuery, limit)
+  } else if (selectedCategory) {
+    posts = await getBlogPostsByCategory(selectedCategory, limit)
+  } else {
+    posts = await getLatestBlogPosts({ limit, forDisplay: true })
+  }
 
   if (!posts || posts.length === 0) {
     return (
       <div className="col-span-full py-12 text-center text-zinc-500 dark:text-zinc-400">
-        <p className="text-lg">暂无文章</p>
-        <p className="mt-2 text-sm">该分类下还没有发布任何文章</p>
+        <p className="text-lg">{searchQuery ? '没有找到相关文章' : '暂无文章'}</p>
+        <p className="mt-2 text-sm">
+          {searchQuery
+            ? `未找到与"${searchQuery}"相关的文章，试试其他关键词`
+            : '该分类下还没有发布任何文章'}
+        </p>
       </div>
     )
   }

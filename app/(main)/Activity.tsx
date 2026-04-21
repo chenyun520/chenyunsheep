@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import React from 'react'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { Tooltip } from '~/components/ui/Tooltip'
 
@@ -30,17 +30,15 @@ const appLabels: { [app: string]: string } = {
   resolve: 'DaVinci Resolve',
 }
 export function Activity() {
-  const { data } = useQuery<{ app: string }>(
-    'activity',
-    () => fetch('/api/activity').then((res) => res.json()),
-    {
-      refetchInterval: 5000,
-      enabled:
-        typeof window === 'undefined'
-          ? false
-          : new URL(window.location.href).hostname === 'chenyun.so',
-    }
-  )
+  const { data } = useQuery<{ app: string }>({
+    queryKey: ['activity'],
+    queryFn: () => fetch('/api/activity').then((res) => res.json()),
+    refetchInterval: 5000,
+    enabled:
+      typeof window === 'undefined'
+        ? false
+        : new URL(window.location.href).hostname === 'chenyun.so',
+  })
   const [open, setOpen] = React.useState(false)
 
   if (!data) {

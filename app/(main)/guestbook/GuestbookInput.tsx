@@ -10,7 +10,7 @@ import {
 } from 'framer-motion'
 import Image from 'next/image'
 import React from 'react'
-import { useMutation } from 'react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useReward } from 'react-rewards'
 import TextareaAutosize from 'react-textarea-autosize'
 
@@ -57,9 +57,9 @@ export function GuestbookInput() {
     elementCount: 62,
   })
 
-  const { mutate: signGuestbook, isLoading } = useMutation(
-    ['guestbook'],
-    async () => {
+  const { mutate: signGuestbook, isPending } = useMutation({
+    mutationKey: ['guestbook'],
+    mutationFn: async () => {
       const res = await fetch('/api/guestbook', {
         method: 'POST',
         headers: {
@@ -79,28 +79,26 @@ export function GuestbookInput() {
       const data: GuestbookDto = await res.json()
       return data
     },
-    {
-      onSuccess: (data) => {
-        setMessage('')
-        setIsPreviewing(false)
-        reward()
-        signBook(data)
-      },
-      onError: (error: Error) => {
-        console.error('Failed to sign guestbook:', error)
-        // 如果是认证错误，引导用户重新登录
-        if (error.message.includes('401') || error.message.includes('Not authenticated')) {
-          alert('登录状态已过期，请重新登录')
-          openSignIn()
-        } else {
-          alert('发送失败: ' + error.message)
-        }
-      },
-    }
-  )
+    onSuccess: (data) => {
+      setMessage('')
+      setIsPreviewing(false)
+      reward()
+      signBook(data)
+    },
+    onError: (error: Error) => {
+      console.error('Failed to sign guestbook:', error)
+      // 如果是认证错误，引导用户重新登录
+      if (error.message.includes('401') || error.message.includes('Not authenticated')) {
+        alert('登录状态已过期，请重新登录')
+        openSignIn()
+      } else {
+        alert('发送失败: ' + error.message)
+      }
+    },
+  })
 
   const onClickSend = () => {
-    if (isLoading) {
+    if (isPending) {
       return
     }
 
@@ -136,7 +134,7 @@ export function GuestbookInput() {
     <div
       className={clsxm(
         'group relative flex w-full rounded-xl bg-gradient-to-b from-zinc-50/50 to-white/70 p-2 pb-6 shadow-xl shadow-zinc-500/10 ring-2 ring-zinc-200/30 transition-opacity [--spotlight-color:rgb(236_252_203_/_0.25)] dark:from-zinc-900/70 dark:to-zinc-800/60 dark:shadow-zinc-700/10 dark:ring-zinc-700/30 dark:[--spotlight-color:rgb(217_249_157_/_0.04)] md:p-4',
-        isLoading && 'pointer-events-none opacity-50'
+        isPending && 'pointer-events-none opacity-50'
       )}
       onMouseMove={handleMouseMove}
     >
@@ -148,7 +146,7 @@ export function GuestbookInput() {
       <div
         className={clsxm(
           'pointer-events-none absolute inset-0 z-0 select-none overflow-hidden rounded-xl mix-blend-overlay',
-          isLoading && 'opacity-0'
+          isPending && 'opacity-0'
         )}
       >
         <svg
@@ -256,7 +254,7 @@ export function GuestbookInput() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     type="button"
-                    disabled={isLoading}
+                    disabled={isPending}
                     onClick={() => setIsPreviewing((prev) => !prev)}
                   >
                     {isPreviewing ? (
@@ -273,7 +271,7 @@ export function GuestbookInput() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     type="button"
-                    disabled={isLoading}
+                    disabled={isPending}
                     onClick={onClickSend}
                   >
                     <TiltedSendIcon className="h-5 w-5 text-zinc-800 dark:text-zinc-200" />

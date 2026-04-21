@@ -53,18 +53,28 @@ export async function PATCH(req: NextRequest) {
     })
   }
 
-  let current = await redis.get<number[]>(key)
-  if (!current) {
-    current = [0, 0, 0, 0]
-  }
-  // increment the array value at the index
-  current[parseInt(index)] += 1
-
-  await redis.set(key, current)
+  // 使用 Redis 原子操作避免并发竞态条件
+  const idx = parseInt(index)
+  const result = await redis.eval<[string], number[]>(
+    `
+    local key = KEYS[1]
+    local index = tonumber(ARGV[1])
+    local current = redis.call('GET', key)
+    if not current then
+      current = cjson.encode({0, 0, 0, 0})
+    end
+    local arr = cjson.decode(current)
+    arr[index + 1] = arr[index + 1] + 1
+    redis.call('SET', key, cjson.encode(arr))
+    return cjson.encode(arr)
+    `,
+    [key],
+    [idx.toString()]
+  )
 
   revalidateTag(key)
 
   return NextResponse.json({
-    data: current,
+    data: result ?? [0, 0, 0, 0],
   })
 }
