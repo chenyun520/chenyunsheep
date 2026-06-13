@@ -255,7 +255,7 @@ export function AmaClient() {
           <div className="relative p-8">
             {/* 装饰按钮 */}
             <div className="flex justify-center mb-6">
-              <a href="https://order.cherishbloom.top/" target="_blank" rel="noopener noreferrer">
+              <a href="https://order.chenyunsheep.top" target="_blank" rel="noopener noreferrer">
                 <DecorativeButton />
               </a>
             </div>
