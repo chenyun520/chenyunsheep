@@ -1,6 +1,6 @@
 'use client'
 
-import { useClerk, useUser } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
 import { useMutation } from '@tanstack/react-query'
 import { clsxm } from '@zolplay/utils'
 import {
@@ -20,15 +20,16 @@ import { CommentMarkdown } from '~/components/CommentMarkdown'
 import { RichLink } from '~/components/links/RichLink'
 import { ElegantTooltip } from '~/components/ui/Tooltip'
 import { type GuestbookDto } from '~/db/dto/guestbook.dto'
+import { buildGuestIdentity } from '~/lib/guest'
 
 const MAX_MESSAGE_LENGTH = 600
 const REWARDS_ID = 'guestbook-rewards'
 
 export function GuestbookInput() {
   const { user } = useUser()
-  const { openSignIn } = useClerk()
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [message, setMessage] = React.useState('')
+  const [nickname, setNickname] = React.useState('')
   const [isPreviewing, setIsPreviewing] = React.useState(false)
 
   const { reward } = useReward(REWARDS_ID, 'emoji', {
@@ -68,11 +69,14 @@ export function GuestbookInput() {
         credentials: 'include', // 确保发送 cookies
         body: JSON.stringify({
           message,
+          ...(user ? {} : { nickname: nickname.trim() }),
         }),
       })
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({})) as { error?: string }
+        const errorData = (await res.json().catch(() => ({}))) as {
+          error?: string
+        }
         throw new Error(errorData.error || `HTTP error: ${res.status}`)
       }
 
@@ -87,13 +91,7 @@ export function GuestbookInput() {
     },
     onError: (error: Error) => {
       console.error('Failed to sign guestbook:', error)
-      // 如果是认证错误，引导用户重新登录
-      if (error.message.includes('401') || error.message.includes('Not authenticated')) {
-        alert('登录状态已过期，请重新登录')
-        openSignIn()
-      } else {
-        alert('发送失败: ' + error.message)
-      }
+      alert('发送失败: ' + error.message)
     },
   })
 
@@ -124,11 +122,9 @@ export function GuestbookInput() {
   )
   const background = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, var(--spotlight-color) 0%, transparent 85%)`
 
-  if (!user) {
-    return (
-      <div className="h-[82px] animate-pulse rounded-xl bg-white/70 ring-2 ring-zinc-200/30 dark:bg-zinc-800/80 dark:ring-zinc-700/30" />
-    )
-  }
+  const avatarSrc = user
+    ? user.imageUrl || `/avatars/avatar_1.png`
+    : buildGuestIdentity(nickname.trim() || '游客').userInfo.imageUrl
 
   return (
     <div
@@ -180,7 +176,7 @@ export function GuestbookInput() {
 
       <div className="z-10 h-8 w-8 shrink-0 md:h-10 md:w-10">
         <Image
-          src={user.imageUrl || `/avatars/avatar_1.png`}
+          src={avatarSrc}
           alt=""
           width={40}
           height={40}
@@ -190,6 +186,17 @@ export function GuestbookInput() {
       </div>
 
       <div className="z-10 ml-2 flex-1 shrink-0 md:ml-4">
+        {!user ? (
+          <input
+            type="text"
+            value={nickname}
+            maxLength={20}
+            onChange={(event) => setNickname(event.target.value)}
+            placeholder="你的昵称（必填）"
+            aria-label="昵称"
+            className="mb-2 block w-[200px] shrink-0 rounded-lg bg-zinc-100/80 px-2 py-1 text-xs text-zinc-800 placeholder-zinc-400 outline-none ring-1 ring-zinc-200/50 transition focus:ring-lime-400/60 dark:bg-zinc-800/80 dark:text-zinc-200 dark:ring-zinc-700/50"
+          />
+        ) : null}
         {isPreviewing ? (
           <div
             className="comment__message flex-1 shrink-0 px-2 py-1 text-sm text-zinc-800 dark:text-zinc-200"
