@@ -76,13 +76,13 @@ function SimulatedAvatar({
 
 export function Newsletter({ _subCount }: { _subCount?: string }) {
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-16 md:flex-row">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 md:flex-row md:gap-10">
       {/* 卡片一：社区统计 */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative -ml-[100px] flex flex-1 items-center
+        className="relative flex flex-1 items-center
                    justify-between rounded-[30px]
                    bg-zinc-100
                    px-8
