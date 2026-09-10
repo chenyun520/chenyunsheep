@@ -69,10 +69,14 @@ export async function POST(req: NextRequest) {
     // generate a random one-time token
     const token = crypto.randomUUID()
 
-    await db.insert(subscribers).values({
-      email: parsed.email,
-      token,
-    })
+    // 唯一索引兜底：并发重复订阅时静默忽略插入，避免撞唯一索引报错
+    await db
+      .insert(subscribers)
+      .values({
+        email: parsed.email,
+        token,
+      })
+      .onConflictDoNothing()
 
     if (env.NODE_ENV === 'production') {
       await resend.emails.send({

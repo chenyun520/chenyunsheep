@@ -251,20 +251,35 @@ export async function POST(req: NextRequest, { params }: Params) {
           )
 
           if (primaryEmailAddress) {
-            await resend.emails.send({
-              from: emailConfig.from,
-              to: primaryEmailAddress.emailAddress,
-              subject: '👋 有人回复了你的评论',
-              react: NewReplyCommentEmail({
-                postTitle: post.title,
-                postLink: url(`/blog/${post.slug}`).href,
-                postImageUrl: post.imageUrl,
-                userFirstName: userInfo.firstName ?? '游客',
-                userLastName: userInfo.lastName ?? null,
-                userImageUrl: userInfo.imageUrl ?? undefined,
-                commentContent: body.text,
-              }),
-            })
+            // 每条父评论每小时最多发一封回复通知，防止匿名刷回复轰炸被回复者邮箱
+            const cooldownKey = `comments:replymail:${parentId}`
+            let shouldSendMail = true
+            try {
+              const acquired = await redis.set(cooldownKey, '1', {
+                nx: true,
+                ex: 3600,
+              })
+              shouldSendMail = acquired === 'OK'
+            } catch {
+              shouldSendMail = true // Redis 故障时放行，与站内限流失败策略一致
+            }
+
+            if (shouldSendMail) {
+              await resend.emails.send({
+                from: emailConfig.from,
+                to: primaryEmailAddress.emailAddress,
+                subject: '👋 有人回复了你的评论',
+                react: NewReplyCommentEmail({
+                  postTitle: post.title,
+                  postLink: url(`/blog/${post.slug}`).href,
+                  postImageUrl: post.imageUrl,
+                  userFirstName: userInfo.firstName ?? '游客',
+                  userLastName: userInfo.lastName ?? null,
+                  userImageUrl: userInfo.imageUrl ?? undefined,
+                  commentContent: body.text,
+                }),
+              })
+            }
           }
         }
       } catch (emailError) {
