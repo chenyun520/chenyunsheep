@@ -2,14 +2,13 @@
 
 import 'dayjs/locale/zh-cn'
 
-import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
 import { useMutation } from '@tanstack/react-query'
 import { clsxm } from '@zolplay/utils'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
 import React from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useSnapshot } from 'valtio'
@@ -27,21 +26,19 @@ import {
   EyeOpenIcon,
   NewCommentIcon,
   TiltedSendIcon,
-  UserArrowLeftIcon,
   UTurnLeftIcon,
   XIcon,
   XSquareIcon,
 } from '~/assets'
 import { CommentMarkdown } from '~/components/CommentMarkdown'
 import { RichLink } from '~/components/links/RichLink'
-import { Button } from '~/components/ui/Button'
 import { HoverCard } from '~/components/ui/HoverCard'
 import { ElegantTooltip } from '~/components/ui/Tooltip'
 import {
   type CommentDto,
   type PostIDLessCommentDto,
 } from '~/db/dto/comment.dto'
-import { url } from '~/lib'
+import { buildGuestIdentity } from '~/lib/guest'
 import { parseDisplayName } from '~/lib/string'
 
 dayjs.extend(relativeTime)
@@ -54,9 +51,9 @@ type CommentableProps = {
 }
 
 function Root({ className, blockId }: CommentableProps) {
-  const pathname = usePathname()
   const { postId, comments, currentBlockId } = useSnapshot(blogPostState)
   const { user: me } = useUser()
+  const [guestNickname, setGuestNickname] = React.useState('')
   const [isCommenting, setIsCommenting] = React.useState(false)
   const currentComments = React.useMemo(
     () => comments.filter((c) => c.body.blockId === blockId),
@@ -115,14 +112,15 @@ function Root({ className, blockId }: CommentableProps) {
             text: comment,
           } satisfies CommentDto['body'],
           parentId: blogPostState.replyingTo?.id,
+          ...(me ? {} : { nickname: guestNickname.trim() }),
         }),
       })
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({})) as { error?: string }
-        throw new Error(
-          errorData.error || `HTTP error! status: ${res.status}`
-        )
+        const errorData = (await res.json().catch(() => ({}))) as {
+          error?: string
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`)
       }
 
       const data: CommentDto = await res.json()
@@ -298,26 +296,13 @@ function Root({ className, blockId }: CommentableProps) {
                     ref={formRef}
                     onSubmit={onSubmit}
                   >
-                    <SignedIn>
-                      <CommentTextarea
-                        isPending={isPending}
-                        onSubmit={onSubmit}
-                      />
-                    </SignedIn>
-
-                    <SignedOut>
-                      <div className="flex justify-center">
-                        <SignInButton
-                          mode="modal"
-                          redirectUrl={url(pathname).href}
-                        >
-                          <Button type="button">
-                            <UserArrowLeftIcon className="mr-1 h-5 w-5" />
-                            登录后参与讨论
-                          </Button>
-                        </SignInButton>
-                      </div>
-                    </SignedOut>
+                    <CommentTextarea
+                      isPending={isPending}
+                      onSubmit={onSubmit}
+                      isGuest={!me}
+                      nickname={guestNickname}
+                      onNicknameChange={setGuestNickname}
+                    />
                   </form>
                 </main>
               </motion.div>
@@ -450,8 +435,17 @@ Comment.displayName = 'Commentable.Comment'
 type CommentTextareaProps = {
   isPending?: boolean
   onSubmit?: (comment: string) => void
+  isGuest?: boolean
+  nickname?: string
+  onNicknameChange?: (value: string) => void
 }
-function CommentTextarea({ isPending, onSubmit }: CommentTextareaProps) {
+function CommentTextarea({
+  isPending,
+  onSubmit,
+  isGuest,
+  nickname,
+  onNicknameChange,
+}: CommentTextareaProps) {
   const { user: me } = useUser()
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [comment, setComment] = React.useState('')
@@ -560,6 +554,18 @@ function CommentTextarea({ isPending, onSubmit }: CommentTextareaProps) {
         )}
       </AnimatePresence>
 
+      {isGuest ? (
+        <input
+          type="text"
+          value={nickname ?? ''}
+          maxLength={20}
+          onChange={(e) => onNicknameChange?.(e.target.value)}
+          placeholder="你的昵称（必填）"
+          aria-label="昵称"
+          className="mb-1 block w-[180px] shrink-0 rounded-md bg-zinc-100/80 px-2 py-1 text-xs text-zinc-800 placeholder-zinc-400 outline-none ring-1 ring-zinc-200/50 dark:bg-zinc-800/80 dark:text-zinc-200 dark:ring-zinc-700/50"
+        />
+      ) : null}
+
       <div className="flex w-full items-end pb-1">
         {isPreviewing ? (
           <div className="comment__message flex-1 shrink-0 break-all px-2 py-1 text-sm text-zinc-800 dark:text-zinc-200">
@@ -585,7 +591,11 @@ function CommentTextarea({ isPending, onSubmit }: CommentTextareaProps) {
           />
         )}
         <Image
-          src={me?.imageUrl ?? ''}
+          src={
+            isGuest
+              ? buildGuestIdentity(nickname?.trim() || '游客').userInfo.imageUrl
+              : me?.imageUrl || `/avatars/avatar_1.png`
+          }
           alt=""
           className="h-6 w-6 select-none rounded-full"
           width={24}
