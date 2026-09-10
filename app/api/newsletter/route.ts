@@ -46,6 +46,11 @@ export async function POST(req: NextRequest) {
     // generate a random one-time token
     const token = crypto.randomUUID()
 
+    await db.insert(subscribers).values({
+      email: parsed.email,
+      token,
+    })
+
     if (env.NODE_ENV === 'production') {
       await resend.emails.send({
         from: emailConfig.from,
@@ -54,11 +59,6 @@ export async function POST(req: NextRequest) {
         react: ConfirmSubscriptionEmail({
           link: url(`confirm/${token}`).href,
         }),
-      })
-
-      await db.insert(subscribers).values({
-        email: parsed.email,
-        token,
       })
     }
 
