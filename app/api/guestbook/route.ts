@@ -15,6 +15,7 @@ import {
   GuestNicknameSchema,
   isReservedNickname,
 } from '~/lib/guest'
+import { normalizeIpForRateLimit } from '~/lib/ip'
 import { resend } from '~/lib/mail'
 import { redis } from '~/lib/redis'
 
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
   // 游客按 IP 更严限流；登录用户沿用原限流
   const { success, reset } = clerkUserId
     ? await safeRatelimit(getKey(clerkUserId))
-    : await safeGuestRatelimit(req.ip ?? 'unknown')
+    : await safeGuestRatelimit(normalizeIpForRateLimit(req.ip ?? 'unknown'))
   if (!success) {
     return NextResponse.json(
       { error: '发布太频繁啦，稍后再试试', retryAfter: reset },
