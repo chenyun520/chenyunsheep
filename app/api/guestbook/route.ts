@@ -10,6 +10,11 @@ import { guestbook } from '~/db/schema'
 import NewGuestbookEmail from '~/emails/NewGuestbook'
 import { env } from '~/env.mjs'
 import { url } from '~/lib'
+import {
+  buildGuestIdentity,
+  GuestNicknameSchema,
+  isReservedNickname,
+} from '~/lib/guest'
 import { resend } from '~/lib/mail'
 import { redis } from '~/lib/redis'
 
@@ -26,9 +31,29 @@ async function safeRatelimit(limitKey: string) {
       analytics: false,
     })
     const result = await ratelimit.limit(limitKey)
-    return { success: result.success, remaining: result.remaining, reset: result.reset }
+    return {
+      success: result.success,
+      remaining: result.remaining,
+      reset: result.reset,
+    }
   } catch {
     return { success: true, remaining: 999, reset: Date.now() + 10000 }
+  }
+}
+
+// 游客按 IP 限流（5 次 / 600 秒），比登录用户更严格
+async function safeGuestRatelimit(ip: string) {
+  try {
+    const { Ratelimit } = await import('@upstash/ratelimit')
+    const ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, '600 s'),
+      analytics: false,
+    })
+    const result = await ratelimit.limit(`guestbook:guest:${ip}`)
+    return { success: result.success, reset: result.reset }
+  } catch {
+    return { success: true, reset: Date.now() + 600000 }
   }
 }
 
@@ -55,22 +80,19 @@ export async function GET(req: NextRequest) {
 
 const SignGuestbookSchema = z.object({
   message: z.string().min(1).max(600),
+  nickname: z.string().optional(),
 })
 
 export async function POST(req: NextRequest) {
-  const { userId } = getAuth(req)
+  const { userId: clerkUserId } = getAuth(req)
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: '登录已过期，请重新登录后留下评论', code: 'AUTH_EXPIRED' },
-      { status: 401 }
-    )
-  }
-
-  const { success, reset } = await safeRatelimit(getKey(userId))
+  // 游客按 IP 更严限流；登录用户沿用原限流
+  const { success, reset } = clerkUserId
+    ? await safeRatelimit(getKey(clerkUserId))
+    : await safeGuestRatelimit(req.ip ?? 'unknown')
   if (!success) {
     return NextResponse.json(
-      { error: 'Too Many Requests', retryAfter: reset },
+      { error: '发布太频繁啦，稍后再试试', retryAfter: reset },
       { status: 429 }
     )
   }
@@ -85,17 +107,41 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { message } = parseResult.data
-    const user = await clerkClient.users.getUser(userId)
+    const { message, nickname } = parseResult.data
+
+    let userId: string
+    let userInfo: GuestbookDto['userInfo']
+    if (clerkUserId) {
+      const user = await clerkClient.users.getUser(clerkUserId)
+      userId = clerkUserId
+      userInfo = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
+      }
+    } else {
+      const nicknameCheck = GuestNicknameSchema.safeParse(nickname ?? '')
+      if (!nicknameCheck.success) {
+        return NextResponse.json(
+          { error: '请先填写昵称（1-20 个字符）' },
+          { status: 400 }
+        )
+      }
+      if (isReservedNickname(nicknameCheck.data)) {
+        return NextResponse.json(
+          { error: '这个昵称是站长专属，换一个吧' },
+          { status: 400 }
+        )
+      }
+      const guest = buildGuestIdentity(nicknameCheck.data)
+      userId = guest.userId
+      userInfo = guest.userInfo
+    }
 
     const guestbookData = {
       userId,
       message,
-      userInfo: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        imageUrl: user.imageUrl,
-      },
+      userInfo,
     }
 
     if (env.NODE_ENV === 'production' && env.SITE_NOTIFICATION_EMAIL_TO) {
@@ -106,9 +152,9 @@ export async function POST(req: NextRequest) {
           subject: '👋 有人刚刚在留言墙留言了',
           react: NewGuestbookEmail({
             link: url(`/guestbook`).href,
-            userFirstName: user.firstName,
-            userLastName: user.lastName,
-            userImageUrl: user.imageUrl,
+            userFirstName: userInfo.firstName ?? '游客',
+            userLastName: userInfo.lastName ?? null,
+            userImageUrl: userInfo.imageUrl ?? undefined,
             commentContent: message,
           }),
         })

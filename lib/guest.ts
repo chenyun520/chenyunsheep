@@ -44,6 +44,7 @@ export type GuestIdentity = {
 }
 
 // 同一昵称恒定生成同一身份与头像（public/avatars/ 共 8 张）
+/** @precondition nickname 已通过 GuestNicknameSchema 校验 */
 export function buildGuestIdentity(nickname: string): GuestIdentity {
   const trimmed = nickname.trim()
   const seed = stableHash(trimmed)
