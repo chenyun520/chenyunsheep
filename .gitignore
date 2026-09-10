@@ -51,3 +51,4 @@ static/
 
 .react-email/
 /.idea
+.env*
