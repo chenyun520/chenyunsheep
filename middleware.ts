@@ -64,6 +64,11 @@ export default authMiddleware({
     '/api/favicon',
     '/api/clerk-users',
     '/api/link-preview',
+    '/api/guestbook',
+    '/api/comments(.*)',
+    '/api/newsletter',
+    '/api/activity',
+    '/api/tweet(.*)',
     '/api/reactions',
   ],
 })
