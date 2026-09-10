@@ -119,8 +119,8 @@ export async function Footer() {
             <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
               <p className="text-sm text-zinc-500/80 dark:text-zinc-400/80">
                 &copy; {new Date().getFullYear()} Chenyun.
-                <PeekabooLink href="https://cherishbloom.top/">
-                  cherishbloom
+                <PeekabooLink href="https://www.chenyunsheep.top/">
+                  chenyunsheep
                 </PeekabooLink>
               </p>
               <Links />

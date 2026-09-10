@@ -212,7 +212,7 @@ export function AmaClient() {
           ]}
           price="¥150/30分钟 · ¥300/60分钟"
           buttonText="立即预约咨询"
-          buttonHref="https://order.cherishbloom.top/"
+          buttonHref="https://order.chenyunsheep.top/"
           accentColor="from-lime-400 to-emerald-500"
         />
 
@@ -230,7 +230,7 @@ export function AmaClient() {
           ]}
           price="根据项目需求报价"
           buttonText="联系了解详情"
-          buttonHref="https://order.cherishbloom.top/"
+          buttonHref="https://order.chenyunsheep.top/"
           accentColor="from-cyan-400 to-blue-500"
         />
       </div>
@@ -262,7 +262,7 @@ export function AmaClient() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
-                href="https://order.cherishbloom.top/"
+                href="https://order.chenyunsheep.top/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg

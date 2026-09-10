@@ -135,7 +135,7 @@ export default function AboutPage() {
             想和我聊聊？
           </p>
           <a
-            href="https://order.cherishbloom.top/"
+            href="https://order.chenyunsheep.top/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
