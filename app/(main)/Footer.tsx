@@ -14,6 +14,7 @@ import { prettifyNumber } from '~/lib/math'
 import { redis } from '~/lib/redis'
 
 import { Newsletter } from './Newsletter'
+import { SubscribeForm } from './SubscribeForm'
 
 function NavLink({
   href,
@@ -114,6 +115,7 @@ export async function Footer() {
             <div className="mx-auto mb-8 max-w-md">
               <Newsletter _subCount={`${subs?.subCount ?? '0'}`} />
             </div>
+            <SubscribeForm />
             <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
               <p className="text-sm text-zinc-500/80 dark:text-zinc-400/80">
                 &copy; {new Date().getFullYear()} Chenyun.

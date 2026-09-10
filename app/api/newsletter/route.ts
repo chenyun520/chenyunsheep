@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { data } = await req.json()
-    const parsed = newsletterFormSchema.parse(data)
+    // 同时兼容 react-hook-form 的 { data: {...} } 包装与普通 { email } 请求体
+    const body = await req.json()
+    const parsed = newsletterFormSchema.parse(body?.data ?? body)
 
     const [subscriber] = await db
       .select()
@@ -40,6 +41,28 @@ export async function POST(req: NextRequest) {
       .where(eq(subscribers.email, parsed.email))
 
     if (subscriber) {
+      if (subscriber.subscribedAt) {
+        return NextResponse.json({ status: 'success' })
+      }
+
+      // 未确认订阅者：重生成 token 并重发确认邮件（仅生产发信）
+      const newToken = crypto.randomUUID()
+      await db
+        .update(subscribers)
+        .set({ token: newToken })
+        .where(eq(subscribers.email, parsed.email))
+
+      if (env.NODE_ENV === 'production') {
+        await resend.emails.send({
+          from: emailConfig.from,
+          to: parsed.email,
+          subject: '来自 Chenyun 的订阅确认',
+          react: ConfirmSubscriptionEmail({
+            link: url(`confirm/${newToken}`).href,
+          }),
+        })
+      }
+
       return NextResponse.json({ status: 'success' })
     }
 
