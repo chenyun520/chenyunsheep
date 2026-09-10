@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Container } from '~/components/ui/Container'
 
 export const metadata = {
-  title: '关于我 | Chenyun',
+  title: '关于我',
   description:
     '精益工程师、全栈开发者、UI/UX 设计师。热爱技术、设计与持续改善。',
 }

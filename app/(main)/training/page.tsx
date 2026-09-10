@@ -1,9 +1,21 @@
+import { type Metadata } from 'next'
 import React from 'react'
 
 import { PresentationIcon } from '~/assets'
 import { Container } from '~/components/ui/Container'
 
 import { ReportsSection } from './ReportsSection'
+
+const title = '培训课程'
+const description =
+  '分享精益生产与现场管理的实战经验：生产现场日常管理、精益6S管理培训课件，以及课件开发与课程培训服务。'
+
+export const metadata = {
+  title,
+  description,
+  openGraph: { title, description },
+  twitter: { title, description, card: 'summary_large_image' },
+} satisfies Metadata
 
 function ServiceCard3D({
   title,

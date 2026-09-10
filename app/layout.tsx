@@ -18,7 +18,8 @@ export const metadata: Metadata = {
     default: seo.title,
   },
   description: seo.description,
-  keywords: 'Chenyun,Chenyun,郭晓楠,佐玩,精益工程师,CEO,开发者,设计师,细节控,创新',
+  keywords:
+    '陈云,chenyun,chenyun-sheep,精益工程师,6S管理,精益生产,培训,Next.js,全栈开发',
   manifest: '/site.webmanifest',
   robots: {
     index: true,
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     siteName: 'Chenyun',
     locale: 'zh_CN',
     type: 'website',
-    url: 'https://www.cherishbloom.top',
+    url: seo.url,
   },
   twitter: {
     site: '@chenyun_engineer',
@@ -70,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider localization={zhCN}>
+    <ClerkProvider localization={zhCN} signInUrl="/sign-in" signUpUrl="/sign-up">
       <html
         lang="zh-CN"
         className={`${sansFont.variable} m-0 h-full p-0 font-sans antialiased`}
