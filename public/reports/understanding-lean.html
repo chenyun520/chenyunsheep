@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精益创新 - 哈尔斯年度战略汇报</title>
+    <link rel="stylesheet" href="/reports/understanding-lean.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Zhi+Mang+Xing&family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== 全局基础设定 ==================== */
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #808080;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; overflow: hidden;
+        }
+
+        :root {
+            --bg-white: #FFFFFF;
+            --corporate-blue: #003399;
+            --dark-navy: #0F172A;
+            --accent-yellow: #FACC15;
+            --text-gray: #64748B;
+            --alert-red: #D93025;
+            --tag-bg-red: #FFF1F0;
+            --tag-text-red: #F5222D;
+            --tag-bg-orange: #FFF7E6;
+            --tag-text-orange: #FA8C16;
+            --text-deep-gray: #334155;
+        }
+
+        .presentation-wrapper {
+            width: 1280px; height: 720px;
+            position: relative; background-color: #f1f5f9;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6); overflow: hidden;
+        }
+
+        .slide {
+            position: absolute; inset: 0; background-color: var(--bg-white);
+            display: flex; flex-direction: column; overflow: hidden;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: scale(0.98) translateY(15px);
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1) translateY(0); pointer-events: auto; z-index: 10; }
+        .slide.prev { transform: scale(1.02) translateY(-15px); opacity: 0; visibility: hidden; }
+
+        /* ==================== 翻页笔交互动画系统 ==================== */
+        .fragment { opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .fragment.visible { opacity: 1; transform: translateY(0); }
+        .fragment-left { opacity: 0; transform: translateX(-30px); transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .fragment-left.visible { opacity: 1; transform: translateX(0); }
+        .fragment-scale { opacity: 0; transform: scale(1.5); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .fragment-scale.visible { opacity: 1; transform: scale(1) rotate(-12deg); }
+
+        /* ==================== 思想升华专属特效 ==================== */
+        .strike-line {
+            position: absolute; left: -5%; top: 50%; width: 110%; height: 8px;
+            background-color: var(--alert-red);
+            transform: scaleX(0); transform-origin: left center;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+            z-index: 10; box-shadow: 0 2px 4px rgba(217, 48, 37, 0.3);
+        }
+        .no-stamp {
+            position: absolute; top: 50%; left: 50%; 
+            font-size: 160px; font-weight: 900; color: var(--accent-yellow); font-style: italic;
+            transform: translate(-50%, -50%) scale(1.8) rotate(-15deg);
+            opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 30; text-shadow: 8px 8px 0 rgba(0,0,0,0.15); pointer-events: none;
+        }
+        .consensus-content { opacity: 0; transform: translateY(30px); transition: all 0.6s ease 0.3s; }
+        .consensus-content.visible { opacity: 1; transform: translateY(0); }
+        .slide:has(.consensus-content.visible) .strike-line { transform: scaleX(1); }
+        .slide:has(.consensus-content.visible) .no-stamp { opacity: 1; transform: translate(-50%, -60%) scale(1) rotate(-15deg); }
+
+        /* ==================== 尾页专属滚动字幕 ==================== */
+        .marquee-wrapper { position: absolute; width: 100%; overflow: hidden; white-space: nowrap; font-family: 'Poppins', sans-serif; font-size: 150px; font-weight: 900; color: rgba(0, 47, 167, 0.03); z-index: 0; pointer-events: none;}
+        .marquee-wrapper.top { top: 5%; }
+        .marquee-wrapper.bottom { bottom: 5%; }
+        .marquee-inner { display: inline-block; animation: marqueeScroll 40s linear infinite; }
+        .marquee-wrapper.bottom .marquee-inner { animation-direction: reverse; }
+        @keyframes marqueeScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* ==================== 全局通用组件 ==================== */
+        .bg-watermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Inter', sans-serif; font-size: 200px; font-weight: 900;
+            color: rgba(0, 47, 167, 0.03); z-index: 0; user-select: none; line-height: 1; 
+            white-space: nowrap; width: 100%; text-align: center; letter-spacing: 5px;
+        }
+        
+        .slide-header-anim { opacity: 0; transform: translateY(-20px); transition: all 0.8s ease 0.2s; }
+        .slide.active .slide-header-anim { opacity: 1; transform: translateY(0); }
+
+        .header-section { position: relative; z-index: 20; padding: 40px 60px 10px 60px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0;}
+        .header-center { position: relative; z-index: 20; text-align: center; padding-top: 40px; margin-bottom: 10px; flex-shrink: 0; }
+        
+        .top-tag { background-color: var(--corporate-blue); color: white; padding: 3px 10px; font-size: 11px; font-weight: 700; border-radius: 4px; letter-spacing: 2px; text-transform: uppercase; display: inline-block; margin-bottom: 8px; transform: translateY(-4px); }
+        .main-title-center { font-size: 42px; font-weight: 900; color: var(--dark-navy); letter-spacing: -1px; position: relative; display: inline-block; }
+        
+        .highlight-mark-center { position: relative; z-index: 1; padding: 0 4px; }
+        .highlight-mark-center::after { content: ''; position: absolute; left: 0; bottom: 4px; width: 100%; height: 20px; background-color: var(--accent-yellow); opacity: 0.6; z-index: -1; transform: skewX(-12deg); }
+        
+        .progress-bar { position: absolute; bottom: 0; left: 0; height: 6px; background: linear-gradient(90deg, var(--accent-yellow), #FFEA70); transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1000; }
+        .footer-bar { position: absolute; bottom: 0; left: 60px; right: 60px; height: 80px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F1F5F9; z-index: 20; background-color: rgba(255,255,255,0.8); }
+
+        /* 原则详情页组件 */
+        .content-grid { flex-grow: 1; display: grid; grid-template-columns: 45% 50%; gap: 5%; padding: 20px 60px 80px 60px; position: relative; z-index: 10; }
+        .left-column { display: flex; flex-direction: column; justify-content: center; gap: 40px; }
+        .right-column { display: flex; flex-direction: column; justify-content: space-between; gap: 20px; padding-bottom: 20px;}
+        .principle-badge { background-color: var(--corporate-blue); color: white; padding: 4px 12px; font-size: 14px; font-weight: 800; border-radius: 4px; letter-spacing: 1px; margin-bottom: 12px; display: inline-block; }
+        .main-title { font-size: 56px; font-weight: 900; color: var(--dark-navy); line-height: 1; letter-spacing: -2px; }
+        .highlight-mark { position: relative; display: inline-block; z-index: 1; }
+        .highlight-mark::after { content: ''; position: absolute; left: -4px; right: -4px; bottom: 4px; height: 20px; background-color: var(--accent-yellow); opacity: 0.6; z-index: -1; transform: skewX(-12deg); }
+        .pain-point { font-size: 32px; font-weight: 300; color: #64748B; line-height: 1.4; }
+        .pain-point strong { color: var(--dark-navy); font-weight: 900; border-bottom: 4px solid #E2E8F0; }
+        .solution-box { border-left: 6px solid var(--corporate-blue); padding-left: 30px; }
+        .solution-title { font-size: 64px; font-weight: 900; color: var(--corporate-blue); line-height: 1; margin-bottom: 10px; letter-spacing: -2px; }
+        .solution-desc { font-size: 20px; font-weight: 700; color: #475569; }
+        .insight-box { background-color: #F8FAFC; padding: 20px 24px; border-radius: 8px; display: flex; align-items: center; gap: 16px; }
+        .insight-text { font-size: 18px; color: var(--dark-navy); font-weight: 600; line-height: 1.4; }
+        .training-card { background-color: white; border: 2px solid #E2E8F0; border-radius: 12px; padding: 24px; display: flex; align-items: center; justify-content: space-between; }
+        .training-label { font-size: 12px; font-weight: 700; color: #94A3B8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+        .training-name { font-size: 24px; font-weight: 800; color: var(--dark-navy); }
+        .case-card { flex-grow: 1; background: linear-gradient(135deg, #F0F5FF 0%, #FFFFFF 100%); border: 1px solid #BFDBFE; border-radius: 12px; padding: 30px; display: flex; flex-direction: column; justify-content: center; position: relative;}
+        .case-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #DBEAFE; padding-bottom: 15px; }
+        .case-title { font-size: 14px; font-weight: 700; color: var(--corporate-blue); letter-spacing: 1px; text-transform: uppercase; }
+
+        /* ==================== P2 隐形账单 (纯正复原版) ==================== */
+        .receipt-container { display: flex; justify-content: center; align-items: center; position: relative; }
+        .receipt-card { width: 380px; background: #fff; padding: 30px 30px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.02); font-family: 'Space Mono', 'Noto Sans SC', monospace; transform: rotate(-3deg) translateY(-10px); position: relative; z-index: 10; margin: 0 auto;}
+        .receipt-card::before { content: ""; position: absolute; top: -6px; left: 0; width: 100%; height: 6px; background-image: linear-gradient(-45deg, transparent 10px, #fff 10px), linear-gradient(45deg, transparent 10px, #fff 10px); background-size: 14px 14px; }
+        .receipt-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; color: #334155; }
+        .tag-waste { background-color: var(--tag-bg-red); color: var(--tag-text-red); font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 6px; font-weight: bold; font-family: 'Noto Sans SC', sans-serif;}
+        .tag-necessary { background-color: var(--tag-bg-orange); color: var(--tag-text-orange); font-size: 10px; padding: 1px 5px; border-radius: 2px; margin-left: 6px; font-weight: bold; font-family: 'Noto Sans SC', sans-serif;}
+        .value-added-box { background-color: #EFF6FF; border: 1px solid #BFDBFE; color: var(--corporate-blue); font-weight: bold; padding: 8px 12px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; margin: 15px -10px; font-size: 14px; }
+        .handwritten-comment { font-family: 'Zhi Mang Xing', cursive; color: #D97706; font-size: 16px; position: absolute; right: 0; top: 20px; transform: rotate(-4deg); }
+        .analysis-container { display: flex; flex-direction: column; justify-content: center; padding: 0 60px 0 20px; }
+        .question-box { border-left: 4px solid var(--accent-yellow); padding-left: 24px; margin-bottom: 40px; }
+        .question-text { font-size: 28px; font-weight: 700; color: var(--dark-navy); line-height: 1.4; }
+        .question-highlight { color: var(--corporate-blue); font-weight: 900; background: linear-gradient(to top, #FEF08A 40%, transparent 40%); }
+        .chart-container { width: 100%; }
+        .bar-wrapper { width: 100%; height: 24px; background-color: #F1F5F9; border-radius: 4px; display: flex; overflow: hidden; margin-bottom: 8px; }
+
+        /* ==================== P6 十项原则总览 (纯正复原版) ==================== */
+        .principles-container { flex-grow: 1; padding: 0 80px 80px 80px; position: relative; z-index: 10; display: flex; align-items: center; }
+        .principles-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(5, 1fr); gap: 16px 60px; width: 100%; }
+        .p-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.6); border: 1px solid #F1F5F9; border-radius: 8px; padding: 12px 20px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .p-item:hover { background: white; box-shadow: 0 20px 40px rgba(0, 51, 153, 0.08); border-color: #E2E8F0; transform: translateX(5px); }
+        .p-bg-num { position: absolute; right: 10px; bottom: -15px; font-family: 'Inter', sans-serif; font-size: 60px; font-weight: 900; color: #F1F5F9; line-height: 1; z-index: 0; pointer-events: none; transition: color 0.3s; }
+        .p-item:hover .p-bg-num { color: #EEF2FF; }
+        .p-badge { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 800; color: #CBD5E1; margin-right: 16px; min-width: 24px; border-right: 2px solid #F1F5F9; padding-right: 12px; z-index: 1; }
+        .p-text { font-size: 18px; font-weight: 700; color: #475569; z-index: 1; letter-spacing: 0.5px; }
+        .em-blue { color: var(--corporate-blue); font-weight: 900; }
+        .em-dark { color: var(--dark-navy); font-weight: 900; }
+
+        /* 公式页 / 特效 */
+        .form-wrap { display: flex; align-items: center; justify-content: center; gap: 30px; margin-top: 100px; position: relative; z-index: 10;}
+        .f-item { display: flex; flex-direction: column; align-items: center; }
+        .f-ch { font-size: 52px; font-weight: 900; color: var(--corporate-blue); }
+        .f-en { font-size: 13px; font-weight: 700; color: var(--corporate-blue); background: #EEF2FF; padding: 4px 16px; border-radius: 20px; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .f-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 15px; }
+        .f-sign { font-size: 40px; font-weight: 300; color: #CBD5E1; transform: translateY(-20px);}
+
+        .v-comp { display: flex; align-items: center; justify-content: space-around; }
+        .v-item { text-align: center; }
+        .v-icon { font-size: 40px; font-weight: 900; color: #CBD5E1; margin-bottom: 10px; display: block; }
+        .v-icon.active { color: var(--corporate-blue); transform: scale(1.2); }
+        .p-bar-wrap { flex-grow: 1; height: 24px; background-color: #F1F5F9; border-radius: 12px; overflow: hidden; position: relative; }
+        .p-bar { height: 100%; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 10px; font-weight: 700; }
+        .bubble-bad { background: #FEE2E2; color: #EF4444; text-decoration: line-through; text-decoration-thickness: 3px; padding: 10px 20px; border-radius: 8px; font-weight: 800; font-size: 20px;}
+        .bubble-good { background: #DBEAFE; color: var(--corporate-blue); padding: 10px 20px; border-radius: 8px; font-weight: 800; font-size: 20px;}
+        .circ-grey { border: 2px dashed #CBD5E1; color: #94A3B8; width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;}
+        .circ-blue { background: var(--corporate-blue); color: white; box-shadow: 0 10px 20px rgba(0, 51, 153, 0.2); width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;}
+        .stop-btn { width: 80px; height: 80px; background: #D93025; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; box-shadow: 0 10px 20px rgba(217, 48, 37, 0.3); animation: pulseRed 2s infinite; }
+        @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .rock-icon { font-size: 50px; filter: grayscale(100%) opacity(0.5); position: relative; }
+        .gem-icon { font-size: 50px; filter: drop-shadow(0 0 10px rgba(0, 51, 153, 0.5)); animation: pulseBlue 2s infinite; }
+        @keyframes pulseBlue { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .tree-node { background: white; padding: 4px 12px; border-radius: 20px; border: 1px solid #CBD5E1; font-size: 11px; font-weight: 600; color: #64748B; width: 100%; text-align: center; margin-bottom: 4px;}
+        .tree-root { background: #003399; color: white; border: none; font-weight: 800; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0, 51, 153, 0.2); margin-top: 4px;}
+        .team-person { font-size: 40px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .loop-text { font-size: 80px; color: var(--corporate-blue); font-weight: 900; animation: spin 10s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    </style>
+<style>
+body { padding-bottom: 72px; box-sizing: border-box; background: #10191a; }
+.presentation-wrapper { flex-shrink: 0; transform: scale(var(--report-scale, 1)); }
+.report-controls { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px; width: max-content; max-width: calc(100% - 16px); flex-wrap: wrap; justify-content: center; padding: 10px; border-radius: 16px; background: #142c2c; color: white; font: 13px sans-serif; }
+.report-controls a, .report-controls button, .report-controls select { padding: 7px 9px; border-radius: 8px; background: #263e3e; color: white; border: 1px solid #526464; }
+.report-controls button:disabled { opacity: .4; }
+</style>
+</head>
+<body>
+<nav class="report-controls" aria-label="汇报翻页"><a href="/training#reports">返回培训</a><button id="report-prev" type="button">上一页</button><select id="report-page" aria-label="选择汇报章节"></select><button id="report-next" type="button">下一页</button><button id="report-step" type="button">下一步</button><button id="report-fullscreen" type="button">全屏</button></nav>
+    <div class="presentation-wrapper">
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="slide active">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; z-index: 1; pointer-events: none; line-height: 0.85;">
+                <div style="font-size: 280px; font-weight: 900; color: transparent; -webkit-text-stroke: 3px rgba(0, 51, 153, 0.08); text-transform: uppercase; letter-spacing: -10px; font-family: 'Inter', sans-serif;">LEAN</div>
+                <div style="font-size: 280px; font-weight: 900; color: transparent; -webkit-text-stroke: 3px rgba(0, 51, 153, 0.08); text-transform: uppercase; letter-spacing: -10px; font-family: 'Inter', sans-serif; margin-top: -60px;">THINKING</div>
+                <div style="font-size: 280px; font-weight: 900; color: rgba(240, 245, 255, 0.8); position: absolute; top: 40px; left: 0; right: 0; z-index: -1; text-transform: uppercase; letter-spacing: -10px;">LEAN</div>
+            </div>
+            
+            <div class="absolute top-12 left-16 z-20">
+                <div style="display: flex; flex-direction: column; align-items: flex-start; border-left: 4px solid var(--accent-yellow); padding-left: 12px;">
+                    <span class="text-xs font-bold text-[#64748B] tracking-[0.4em] uppercase mb-1">Strategy</span>
+                    <div class="flex items-baseline leading-none">
+                        <span class="text-4xl font-light text-[#94A3B8] mr-1">20</span>
+                        <span class="text-6xl font-black text-[#003399]">26</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="z-10 text-center relative w-full flex flex-col items-center justify-center h-full" style="margin-top: -30px;">
+                <div style="background-color: var(--corporate-blue); color: white; padding: 4px 16px; transform: skewX(-10deg); display: inline-block; margin-bottom: 20px;">
+                    <span style="display: inline-block; transform: skewX(10deg); font-weight: bold; font-size: 14px; letter-spacing: 3px;">WHAT IS LEAN?</span>
+                </div>
+                <h1 class="text-[140px] font-black text-[#003399] tracking-[0.2em] leading-none mb-6 drop-shadow-sm ml-8">
+                    精益<span class="text-4xl align-top ml-2 text-[#94A3B8] font-light tracking-normal">®</span>
+                </h1>
+                <h2 class="text-5xl font-extrabold text-[#0F172A] mb-10 tracking-normal">
+                    消除浪费，
+                    <span class="relative inline-block z-10">
+                        创造价值
+                        <span class="absolute bottom-2 left-0 w-full h-4 bg-[#FACC15] opacity-70 -z-10 transform -skew-x-12"></span>
+                    </span>
+                </h2>
+                <div class="text-3xl text-[#475569] font-bold max-w-4xl mx-auto leading-loose tracking-wide">
+                    <p class="flex items-center justify-center">
+                        <span class="text-[#003399]">性善学说</span>
+                        <span class="mx-4 text-[#FACC15] font-black text-2xl relative top-[1px]">●</span> 
+                        <span class="text-[#003399]">行动至上</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 w-full px-16 pb-12 z-20 flex justify-between items-end">
+                <div class="flex items-baseline text-[#64748B] opacity-100 font-bold">
+                    <span class="text-lg font-bold">让</span>
+                    <span class="text-2xl font-black italic mx-1 bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]" style="font-family: 'Inter', sans-serif; filter: drop-shadow(0 2px 4px rgba(250, 204, 21, 0.15));">AI</span>
+                    <span class="text-lg font-bold">更有温度</span>
+                    <span class="text-[#CBD5E1] px-4 font-light">/</span>
+                    <span class="text-lg font-bold">让制造更有速度</span>
+                </div>
+                <div class="text-right mb-1">
+                    <div class="text-lg font-bold text-[#0F172A] tracking-[0.1em]">精益革新办</div>
+                    <div class="text-xs font-semibold text-[#94A3B8] tracking-wider mt-1 uppercase">Lean Innovation Office</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">VALUE</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">VALUE DEFINITION</span></div>
+                <h1 class="main-title-center">价值透视：一张被<span class="highlight-mark-center">“拒付”</span>的隐形账单</h1>
+            </div>
+            
+            <div class="content-grid" style="grid-template-columns: 45% 55%; padding-bottom: 80px;">
+                <div class="receipt-container fragment">
+                    <div class="receipt-card">
+                        <div class="text-center border-b-2 border-dashed border-slate-200 pb-3 mb-3">
+                            <div class="text-lg font-bold text-slate-800 tracking-widest mb-1 font-[Noto Sans SC]">哈尔斯制造工厂</div>
+                            <div class="text-[10px] text-slate-400 font-mono">DATE: 2025-10-24 | POS: 01</div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="receipt-row font-bold text-slate-700">
+                                <span>产品原材料</span> <span>$ 45.20</span>
+                            </div>
+                            <div class="receipt-row relative mb-4">
+                                <div class="flex items-center">
+                                    <span class="text-[#D97706]">生产人员工资</span><span class="tag-necessary">必要</span>
+                                </div>
+                                <span class="text-[#D97706]">$ 35.40</span>
+                                <div class="handwritten-comment">(能少点吗?😰)</div>
+                            </div>
+                            <div class="receipt-row text-slate-500">
+                                <div class="flex items-center"><span>物料搬运费</span><span class="tag-waste">搬运</span></div><span>$ 14.32</span>
+                            </div>
+                            <div class="receipt-row text-slate-500">
+                                <div class="flex items-center"><span>设备故障等待</span><span class="tag-waste">等待</span></div><span>$ 19.85</span>
+                            </div>
+                            <div class="receipt-row text-slate-500">
+                                <div class="flex items-center"><span>次品拆解返工</span><span class="tag-waste">缺陷</span></div><span>$ 24.50</span>
+                            </div>
+                            <div class="receipt-row text-slate-500">
+                                <div class="flex items-center"><span>库存积压利息</span><span class="tag-waste">库存</span></div><span>$ 20.15</span>
+                            </div>
+                            <div class="value-added-box">
+                                <span>产品增值加工</span><span>$ 6.88</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-end mt-2 pt-3 border-t-2 border-dashed border-slate-300">
+                            <span class="text-base font-bold text-slate-800 font-mono">TOTAL</span>
+                            <span class="text-xl font-bold text-slate-900 font-mono">$ 181.98</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analysis-container fragment">
+                    <div class="question-box">
+                        <p class="question-text">如果你是客户，<br>你会为这张账单<br><span class="question-highlight"> 全额支付 </span>吗？</p>
+                    </div>
+                    <div class="insight-text">
+                        <p class="mb-2">客户只愿意为 <span class="text-[#003399] font-bold">“改变产品功能”</span> 的几秒钟买单。</p>
+                        <p>其余的动作，统称为 <span class="text-[#D93025] font-bold">“企业自掏腰包的浪费”</span>。</p>
+                    </div>
+                    <div class="chart-container">
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">
+                            <span class="text-[#003399]">Value (5%)</span><span class="text-[#D93025]">Waste (95%)</span>
+                        </div>
+                        <div class="bar-wrapper">
+                            <div class="w-[5%] bg-[#003399]"></div><div class="w-[60%] bg-[#FACC15]"></div><div class="w-[35%] bg-[#D93025]"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
+                            <span>客户买单</span><span>成本黑洞</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">MINDSET</div>
+            
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">COGNITIVE REFRAMING</span></div>
+                <h1 class="main-title-center">认知重塑：走出精益管理的<span class="highlight-mark-center">“两大”误区</span></h1>
+            </div>
+            
+            <div class="flex-1 w-full max-w-[1100px] mx-auto flex items-center justify-between gap-16 relative z-10 pb-16">
+                <div class="flex-1 flex flex-col items-center text-center px-6 fragment">
+                    <div class="text-[13px] font-black text-slate-500 tracking-[2px] mb-6 border border-slate-400 py-1 px-4 rounded-full">NO.1</div>
+                    <div class="text-[48px] font-black text-[#003399] leading-none tracking-tight">精益</div>
+                    <div class="text-[40px] text-red-600 font-medium my-2">≠</div>
+                    <div class="text-[56px] font-black text-[#003399] leading-none mb-4 tracking-tight">某种结果</div>
+                    <div class="text-[18px] text-slate-600 font-medium mb-8 leading-snug">不是为了追求<br>漂亮的 KPI 数字</div>
+                    <div class="flex flex-wrap justify-center gap-3 w-full max-w-[380px]">
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">效率提升30%</span>
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">零库存</span>
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">零缺陷</span>
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">交付缩短</span>
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">零故障</span>
+                        <span class="text-[14px] text-slate-500 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded relative after:content-[''] after:absolute after:left-1.5 after:right-1.5 after:top-1/2 after:h-[2px] after:bg-red-500 after:opacity-80">人均产值翻倍</span>
+                    </div>
+                </div>
+
+                <div class="absolute left-1/2 top-4 bottom-16 w-px bg-slate-300 transform -translate-x-1/2"></div>
+
+                <div class="flex-1 flex flex-col items-center text-center px-6 fragment">
+                    <div class="text-[13px] font-black text-slate-500 tracking-[2px] mb-6 border border-slate-400 py-1 px-4 rounded-full">NO.2</div>
+                    <div class="text-[48px] font-black text-[#003399] leading-none tracking-tight">精益</div>
+                    <div class="text-[40px] text-red-600 font-medium my-2">≠</div>
+                    <div class="text-[56px] font-black text-[#003399] leading-none mb-4 tracking-tight">工具方法</div>
+                    <div class="text-[18px] text-slate-600 font-medium mb-8 leading-snug">不是机械地堆砌<br>各种管理工具</div>
+                    <div class="flex flex-wrap justify-center gap-3 w-full max-w-[380px]">
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">JIT准时化</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">看板管理</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">VSM价值流</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">U型线布局</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">6S现场</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">TPM</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">阿米巴</span>
+                        <span class="text-[14px] text-slate-700 font-bold border border-slate-300 bg-white/80 px-4 py-1.5 rounded">6 Sigma</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark" style="font-family: 'Noto Serif SC', serif; font-style: italic; font-size: 600px; color: rgba(0,47,167,0.025);">f(x)</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">THE LEAN FORMULA</span></div>
+                <h1 class="main-title-center">精益的底层逻辑：一个<span class="highlight-mark-center">核心公式</span></h1>
+            </div>
+            
+            <div class="flex items-center justify-center gap-6 mt-20 relative z-10">
+                <div class="flex flex-col items-center fragment">
+                    <div class="text-[48px] font-black text-[#003399] h-[60px] leading-[60px] flex items-center">精益的人</div>
+                    <div class="text-[13px] font-bold text-[#003399] bg-[#EEF2FF] px-4 py-1 rounded-full mt-4 tracking-wider">PEOPLE</div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#FACC15] mt-4"></div>
+                </div>
+                <div class="text-[40px] text-slate-300 font-light mb-12 fragment">+</div>
+                
+                <div class="flex flex-col items-center fragment">
+                    <div class="text-[48px] font-black text-[#003399] h-[60px] leading-[60px] flex items-center">精益思想</div>
+                    <div class="text-[13px] font-bold text-[#003399] bg-[#EEF2FF] px-4 py-1 rounded-full mt-4 tracking-wider">THINKING</div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-slate-300 mt-4"></div>
+                </div>
+                <div class="text-[40px] text-slate-300 font-light mb-12 fragment">+</div>
+                
+                <div class="flex flex-col items-center fragment">
+                    <div class="text-[48px] font-black text-[#64748B] h-[60px] leading-[60px] flex items-center">精益工具</div>
+                    <div class="text-[13px] font-bold text-[#64748B] bg-slate-100 px-4 py-1 rounded-full mt-4 tracking-wider">TOOLS</div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-slate-300 mt-4"></div>
+                </div>
+                <div class="text-[48px] font-medium text-slate-800 mb-12 ml-2 mr-2 fragment">=</div>
+                
+                <div class="flex flex-col items-center fragment">
+                    <div class="text-[64px] font-black text-[#003399] h-[60px] leading-[60px] flex items-center">精益</div>
+                    <div class="text-[14px] font-bold text-[#003399] bg-[#FEF08A] px-5 py-1.5 rounded-full mt-5 tracking-wider">EXCELLENCE</div>
+                </div>
+            </div>
+
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">PHILOSOPHY</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">SCIENTIFIC DEFINITION</span></div>
+                <h1 class="main-title-center">科学定义：精益的<span class="highlight-mark-center">哲学信念</span>与<span class="highlight-mark-center">行动准则</span></h1>
+            </div>
+            
+            <div style="position: relative; z-index: 10; flex: 1; display: grid; grid-template-columns: 40% 60%; padding: 0 60px 80px 60px; max-w: 1200px; margin: 0 auto;">
+                <div class="pr-12 flex flex-col justify-center fragment border-r border-slate-200">
+                    <div class="mb-10">
+                        <div class="text-[14px] font-bold text-[#94A3B8] tracking-[2px] uppercase mb-2 border-l-4 border-[#FACC15] pl-2">CORE PHILOSOPHY</div>
+                        <div class="text-[40px] font-black text-[#003399] leading-[1.2] mb-1">性善学说</div>
+                        <div class="text-[40px] font-black text-[#0F172A] leading-[1.2]">行动至上</div>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl p-8 relative shadow-sm">
+                        <div class="absolute -top-8 left-4 text-[60px] text-[#E2E8F0] font-serif font-black">“</div>
+                        <div class="text-[22px] font-bold text-[#334155] leading-[1.6] relative z-10">相信一定存在<br><span class="text-[#003399]">比现在更好的办法</span>。</div>
+                    </div>
+                    <div class="mt-8 flex gap-3 flex-wrap">
+                        <span class="text-[12px] text-[#64748B] bg-[#F1F5F9] py-1.5 px-4 rounded-full font-semibold"># 以人为本</span>
+                        <span class="text-[12px] text-[#64748B] bg-[#F1F5F9] py-1.5 px-4 rounded-full font-semibold"># 机制约束</span>
+                        <span class="text-[12px] text-[#64748B] bg-[#F1F5F9] py-1.5 px-4 rounded-full font-semibold"># 全员参与</span>
+                    </div>
+                </div>
+                
+                <div class="pl-12 flex flex-col justify-center fragment">
+                    <div class="mb-6 flex items-center">
+                        <div class="h-[2px] bg-slate-300 w-10 mr-4"></div>
+                        <span class="text-sm font-bold text-[#94A3B8] tracking-widest uppercase">THE TOYOTA WAY - 10 PRINCIPLES</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-8 gap-y-6 w-full">
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">01</span><div><div class="text-[15px] font-bold text-[#334155]">抛弃固定的观念</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">固定観念を捨てよ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">02</span><div><div class="text-[15px] font-bold text-[#334155]">与其想理由，不如想方法</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">できない理由よりやる方法を考えよ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">03</span><div><div class="text-[15px] font-bold text-[#334155]">不要找借口，要否定现状</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">言い訳をするな、現状を否定せよ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">04</span><div><div class="text-[15px] font-bold text-[#334155]">不求完美，<span class="text-[#003399]">50分</span>也马上做</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">完璧を求めるな、50点でよいからすぐやれ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">05</span><div><div class="text-[15px] font-bold text-[#334155]">错误要立即改正</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">誤りは直ちに直せ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">06</span><div><div class="text-[15px] font-bold text-[#334155]">改善<span class="text-[#D93025]">不要花钱</span></div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">改善に金はかけるな</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">07</span><div><div class="text-[15px] font-bold text-[#334155]">智慧是在遇到困难时出来的</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">知恵は困った時に出る</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">08</span><div><div class="text-[15px] font-bold text-[#334155]">追问5次为什么 <span class="text-[12px] bg-yellow-100 text-yellow-700 px-1 rounded ml-1">真因</span></div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">真因を追求せよ</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">09</span><div><div class="text-[15px] font-bold text-[#334155]"><span class="text-[#003399]">10人智慧</span> 胜过1人知识</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">1人の知識より10人の知恵</div></div></div>
+                        <div class="flex items-start"><span class="text-[16px] font-black text-[#CBD5E1] mr-3 mt-1 min-w-[24px]">10</span><div><div class="text-[15px] font-bold text-[#334155]">改善是无限的</div><div class="font-['Noto_Sans_JP'] text-[11px] text-[#94A3B8] mt-1">改善は無限である</div></div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+        
+        <div class="slide">
+            <div class="bg-watermark">TOOLBOX</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">LEAN TOOLS</span></div>
+                <h1 class="main-title-center">体系支撑：精益管理的<span class="highlight-mark-center">核心工具箱</span></h1>
+            </div>
+            
+            <div class="content-grid">
+                <div class="flex flex-col justify-center items-center fragment">
+                    <div class="grid grid-cols-2 gap-4 w-full max-w-[400px]">
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">5S 现场管理</div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">VSM 价值流图</div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">TPM 全员维护</div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">SMED 快速换模</div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">Kanban 看板</div>
+                        <div class="bg-white border border-slate-200 rounded-lg p-4 text-center shadow-sm text-[#0F172A] font-bold">JIT 准时化生产</div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col justify-center px-10 fragment-left">
+                    <div class="text-[28px] font-bold text-slate-800 leading-relaxed mb-6">
+                        工具库是落地的抓手，<br>但生搬硬套注定失败。
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-[#003399] p-6 mb-10">
+                        <p class="text-[18px] text-slate-700 leading-relaxed">
+                            决定工具发挥多大效能的，<br>
+                            是使用工具的 <span class="text-[#003399] font-black text-[24px]">人</span> 
+                            和背后的 <span class="text-[#003399] font-black text-[24px]">思想</span>。
+                        </p>
+                    </div>
+                    <div class="text-xl font-black text-yellow-500 flex items-center gap-4">
+                        <span>今天我们将焦点锁定在：十项精益思想</span>
+                        <span class="text-3xl">➔</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">ACTION</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">GUIDING PRINCIPLES</span></div>
+                <h1 class="main-title-center">行动指南：哈尔斯<span class="highlight-mark-center">十项原则</span></h1>
+            </div>
+            
+            <div class="principles-container slide-header-anim" style="transition-delay: 0.4s;">
+                <div class="principles-grid">
+                    <div class="p-item"><div class="p-bg-num">01</div><div class="p-badge">01</div><div class="p-text"><span class="em-blue">跳出</span>你的思维框框</div></div>
+                    <div class="p-item"><div class="p-bg-num">06</div><div class="p-badge">06</div><div class="p-text"><span class="em-blue">先动脑</span>再动钱</div></div>
+                    <div class="p-item"><div class="p-bg-num">02</div><div class="p-badge">02</div><div class="p-text"><span class="em-blue">想</span>新方法</div></div>
+                    <div class="p-item"><div class="p-bg-num">07</div><div class="p-badge">07</div><div class="p-text">问题的出现给了你<span class="em-blue">思考</span>的机会</div></div>
+                    <div class="p-item"><div class="p-bg-num">03</div><div class="p-badge">03</div><div class="p-text"><span class="em-dark">禁止</span>说“但是”</div></div>
+                    <div class="p-item"><div class="p-bg-num">08</div><div class="p-badge">08</div><div class="p-text">至少<span class="em-blue">问5次“为什么”</span> 直到问题根源</div></div>
+                    <div class="p-item"><div class="p-bg-num">04</div><div class="p-badge">04</div><div class="p-text"><span class="em-blue">立马</span>开动</div></div>
+                    <div class="p-item"><div class="p-bg-num">09</div><div class="p-badge">09</div><div class="p-text"><span class="em-blue">10个人</span>比一个人要强</div></div>
+                    <div class="p-item"><div class="p-bg-num">05</div><div class="p-badge">05</div><div class="p-text"><span class="em-dark">知错就改</span> 善莫大焉</div></div>
+                    <div class="p-item"><div class="p-bg-num">10</div><div class="p-badge">10</div><div class="p-text">改善<span class="em-dark">永无止境</span></div></div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">UNLEARN</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 01</span><h1 class="main-title"><span class="highlight-mark">跳出</span>你的思维框框</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">打破 · 重塑 · 再造</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">最大隐性成本 =<br><strong>“我们一直这么做”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">UNLEARN</div><div class="solution-desc">思维归零 · 主动质疑</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">不仅仅是技术升级，<br>更是<span class="text-[#003399]">权力结构的重塑</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING WORKSHOP</span><span class="training-name">流程解构工作坊</span></div>
+                        <div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider">SOP Deconstruction</div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">TOYOTA CASE STUDY</span><span class="text-xs font-bold text-slate-400">一人一机 vs 多机台</span></div>
+                        <div class="v-comp">
+                            <div class="v-item opacity-50"><span class="v-icon">1:1</span><span class="text-[14px] font-bold text-[#94A3B8] uppercase">传统定势</span></div>
+                            <div class="text-3xl text-slate-300 font-light">➔</div>
+                            <div class="v-item"><span class="v-icon active">1:N</span><span class="text-[14px] font-bold text-[#003399] uppercase">多机台操作</span><div class="mt-2 text-xs font-bold text-white bg-[#003399] px-2 py-1 rounded-full">效率倍增</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">INNOVATE</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 02</span><h1 class="main-title"><span class="highlight-mark">想新方法</span></h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">路径依赖 <span class="text-slate-300">➜</span> 组合创新</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">勤奋的懒惰 =<br><strong>“用旧地图找新大陆”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">RE-THINK</div><div class="solution-desc">不是做得更快，而是换种做法</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">所谓创新，往往只是<br>旧要素的<span class="text-[#003399]">新组合</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">ECRS 分析法</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">取消·合并·重排·简化</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">CLASSIC CASE STUDY</span><span class="text-xs font-bold text-slate-400">快速换模 (SMED)</span></div>
+                        <div class="flex flex-col gap-[20px]">
+                            <div class="flex items-center"><span class="w-[80px] text-[12px] font-bold text-[#94A3B8] text-right mr-[15px]">传统停机</span><div class="p-bar-wrap"><div class="p-bar p7-old"><span class="mr-2">4小时 (内部操作)</span></div></div></div>
+                            <div class="text-center text-slate-300 font-light transform rotate-90 my-[-10px]">➜</div>
+                            <div class="flex items-center"><span class="w-[80px] text-[12px] font-bold text-[#003399] text-right mr-[15px]">新方法</span><div class="p-bar-wrap"><div class="p-bar p7-new"><span class="absolute left-[110%] text-[#003399] text-xs font-bold whitespace-nowrap">9分钟 (F1赛车式)</span></div></div></div>
+                            <div class="mt-4 text-xs text-slate-500 font-medium text-center bg-slate-50 py-2 rounded"><span class="font-bold text-[#003399]">创新点：</span> 将内部作业转化为外部作业</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">NO BUTS</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 03</span><h1 class="main-title"><span class="highlight-mark">禁止</span>说“但是”</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">防御性思维 <span class="text-slate-300">➜</span> 建设性思维</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">最大沟通障碍 =<br><strong>“但是...这个很难”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">YES, AND</div><div class="solution-desc">承认困难，然后寻找路径</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">“但是”是创新的<span class="text-[#D93025]">刹车片</span>，<br>“如何”是创新的<span class="text-[#003399]">油门</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">5W1H 重构法</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">WHY ➜ HOW</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">HAIER CASE STUDY</span><span class="text-xs font-bold text-slate-400">砸冰箱事件</span></div>
+                        <div class="v-comp" style="gap:30px;">
+                            <div class="bubble-bad">但是成本太高</div>
+                            <div class="text-3xl text-slate-300">➜</div>
+                            <div class="bubble-good">如何保证零缺陷?</div>
+                        </div>
+                        <div class="mt-6 text-sm text-slate-600 font-medium text-center"><p>张瑞敏并未接受“但是我们还是发展中企业”的借口，<br>而是直接砸毁76台冰箱，确立质量底线。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">ACTION</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 04</span><h1 class="main-title"><span class="highlight-mark">立马</span>开动</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">完美主义 <span class="text-slate-300">➜</span> 敏捷迭代</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">效率杀手 =<br><strong>“再等等，方案还不完美”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">MVP</div><div class="solution-desc">50分也行，先跑起来</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">站在岸上学不会游泳。<br>行动本身就是<span class="text-[#003399]">消除不确定性</span>的最佳方式。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">纸板工程 (Moonshine)</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">Mockup First</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">BOEING CASE STUDY</span><span class="text-xs font-bold text-slate-400">波音777 模拟仓</span></div>
+                        <div class="v-comp">
+                            <div class="circ-grey"><span class="text-xs font-bold">PPT</span><span class="text-[10px]">讨论3个月</span></div>
+                            <div class="text-3xl text-slate-300">➜</div>
+                            <div class="circ-blue"><span class="text-xl font-black">纸板</span><span class="text-[10px]">模拟1天</span></div>
+                        </div>
+                        <div class="mt-4 text-xs text-slate-500 font-medium text-center"><p>工程师用胶合板搭建全尺寸模型，<br>在开模前发现并解决了数百个干涉问题。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">STOP</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 05</span><h1 class="main-title"><span class="highlight-mark">知错</span>就改</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">掩盖问题 <span class="text-slate-300">➜</span> 暴露问题</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">致命文化 =<br><strong>“千万别让老板看到问题”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title text-[#D93025]">JIDOKA</div><div class="solution-desc">自働化：问题即停线</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">不接受、不制造、不传递缺陷。<br>停线是为了<span class="text-[#D93025]">永不停线</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">安灯系统 (Andon)</span></div>
+                        <div class="text-right"><div class="bg-red-100 text-red-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">Visual Signal</div></div>
+                    </div>
+                    <div class="case-card fragment-left" style="background: linear-gradient(135deg, #FFF1F0 0%, #FFFFFF 100%); border: 1px solid #FECACA;">
+                        <div class="case-header" style="border-bottom: 1px solid #FECACA;"><span class="case-title" style="color: #D93025;">NUMMI CASE STUDY</span><span class="text-xs font-bold text-slate-400">通用的文化冲击</span></div>
+                        <div class="v-comp" style="gap:20px;">
+                            <div class="stop-btn">STOP</div>
+                            <div class="text-sm font-bold text-slate-600">赋予每位员工<br>停线的权力</div>
+                        </div>
+                        <div class="mt-6 text-xs text-slate-500 font-medium text-center"><p>合资厂成立初期，员工频繁拉停产线让美方管理者崩溃，<br>但最终这里成为了通用质量最好的工厂。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">WISDOM</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 06</span><h1 class="main-title"><span class="highlight-mark">先动脑</span>再动钱</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">资本依赖 <span class="text-slate-300">➜</span> 智力依赖</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">简单粗暴 =<br><strong>“搞不定就买新设备”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">KARAKURI</div><div class="solution-desc">低成本自动化 (LCA)</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">花钱买来的往往是<span class="text-[#003399]">成本</span>，<br>动脑改出来的才是<span class="text-[#003399]">利润</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">巧机关 (Karakuri)</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">重力·杠杆·弹簧</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">LCA CASE STUDY</span><span class="text-xs font-bold text-slate-400">无动力滑道</span></div>
+                        <div class="v-comp">
+                            <div class="v-item opacity-50 grayscale"><span class="text-[48px] block mb-2">🤖</span><span class="text-xs font-bold text-slate-400">昂贵机械臂</span></div>
+                            <div class="text-3xl text-slate-300">➜</div>
+                            <div class="v-item"><span class="text-[48px] block mb-2">🎢</span><span class="text-xs font-bold text-[#003399]">重力滑轨</span></div>
+                        </div>
+                        <div class="mt-4 text-xs text-slate-500 font-medium text-center"><p>利用产品自重进行流转，<br>零能耗、零故障、零维护成本。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">CHANCE</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 07</span><h1 class="main-title text-[48px]">问题的出现给了你<span class="highlight-mark">思考的机会</span></h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">掩盖痛苦 <span class="text-slate-300">➜</span> 拥抱礼物</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">本能逃避 =<br><strong>“哎呀，又出问题了”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">GOLD MINE</div><div class="solution-desc">没有问题，才是最大的问题</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">问题是现状与理想的<span class="text-[#003399]">差距</span>，<br>弥补差距的过程就是<span class="text-[#003399]">进化</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">鱼骨图 (Ishikawa)</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">4M1E Analysis</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">METAPHORICAL CASE</span><span class="text-xs font-bold text-slate-400">沙砾与珍珠</span></div>
+                        <div class="v-comp">
+                            <div class="text-center"><span class="rock-icon">🪨</span><div class="text-xs font-bold text-slate-400 mt-2">问题</div></div>
+                            <div class="text-2xl text-slate-300">➜</div>
+                            <div class="text-center"><span class="gem-icon">💎</span><div class="text-xs font-bold text-[#003399] mt-2">资产</div></div>
+                        </div>
+                        <div class="mt-6 text-xs text-slate-500 font-medium text-center"><p>每一次设备故障，都是机器在“说话”，<br>告诉我们哪里需要保养，从而避免更大的崩溃。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">ROOT CAUSE</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 08</span><h1 class="main-title text-[38px]">至少问5次“为什么” <span class="highlight-mark">直到问题根源</span></h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">表象修复 <span class="text-slate-300">➜</span> 根源铲除</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">常见误区 =<br><strong>“头痛医头，脚痛医脚”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">DEEP DIVE</div><div class="solution-desc">像钻头一样深挖真相</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">如果你没有问够5次为什么，<br>你得到的只是<span class="text-[#003399]">借口</span>，不是<span class="text-[#003399]">原因</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">5 Why 分析法</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">Root Cause</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">CLASSIC CASE STUDY</span><span class="text-xs font-bold text-slate-400">杰斐逊纪念堂的墙</span></div>
+                        <div class="flex flex-col gap-2 items-center">
+                            <div class="tree-node">1. 墙壁腐蚀严重 (Why?)</div><div class="text-[#CBD5E1] text-[10px] leading-[0.5]">↓</div>
+                            <div class="tree-node">2. 清洁剂冲洗太频繁 (Why?)</div><div class="text-[#CBD5E1] text-[10px] leading-[0.5]">↓</div>
+                            <div class="tree-node">3. 鸟粪太多 (Why?)</div><div class="text-[#CBD5E1] text-[10px] leading-[0.5]">↓</div>
+                            <div class="tree-node">4. 蜘蛛多吸引了鸟 (Why?)</div><div class="text-[#CBD5E1] text-[10px] leading-[0.5]">↓</div>
+                            <div class="tree-node tree-root">5. 灯光开得太早吸引飞虫!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">TEAMWORK</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 09</span><h1 class="main-title"><span class="highlight-mark">10个人</span>比一个人要强</h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">个人英雄 <span class="text-slate-300">➜</span> 群体智慧</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">管理傲慢 =<br><strong>“我发号施令，你照做”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">SYNERGY</div><div class="solution-desc">三个臭皮匠，顶个诸葛亮</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">只有在一线听得见炮火的人，<br>才知道<span class="text-[#003399]">炸弹</span>该往哪里扔。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">QCC 品管圈</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">Brainstorming</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">HONDA CASE STUDY</span><span class="text-xs font-bold text-slate-400">Waigaya (喧闹讨论)</span></div>
+                        <div class="v-comp">
+                            <div class="text-center"><span class="text-[40px] opacity-30 grayscale filter">🦸‍♂️</span><div class="text-xs font-bold text-slate-300 mt-2">专家</div></div>
+                            <div class="text-2xl text-slate-300">&lt;</div>
+                            <div class="text-center">
+                                <div class="flex gap-[5px]">
+                                    <span class="team-person">👷</span><span class="team-person" style="animation-delay: 0.2s">🧑‍🔧</span><span class="team-person" style="animation-delay: 0.4s">👩‍🏭</span>
+                                </div>
+                                <div class="text-xs font-bold text-[#003399] mt-2">一线团队</div>
+                            </div>
+                        </div>
+                        <div class="mt-6 text-xs text-slate-500 font-medium text-center"><p>本田不迷信专家，而是让不同层级的员工<br>在“无拘无束”的争吵中达成共识。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">FOREVER</div>
+            <div class="header-section slide-header-anim">
+                <div class="flex flex-col items-start"><span class="principle-badge">PRINCIPLE 10</span><h1 class="main-title">改善<span class="highlight-mark">永无止境</span></h1></div>
+                <div class="text-right"><div class="text-xl font-bold text-slate-400">阶段终点 <span class="text-slate-300">➜</span> 螺旋上升</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="left-column">
+                    <div class="pain-point fragment">自满心态 =<br><strong>“我们已经够好了”</strong></div>
+                    <div class="solution-box fragment">
+                        <div class="solution-title">KAIZEN</div><div class="solution-desc">持续改善：每天进步1%</div>
+                    </div>
+                    <div class="insight-box fragment">
+                        <div class="text-[30px]">💡</div><div class="insight-text">精益不是一个<span class="text-[#003399]">项目</span>，<br>而是一种<span class="text-[#003399]">习惯</span>。</div>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="training-card fragment-left">
+                        <div class="flex flex-col"><span class="training-label">TRAINING TOOL</span><span class="training-name">PDCA 循环</span></div>
+                        <div class="text-right"><div class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded font-bold text-xs uppercase tracking-wider mb-1">Plan-Do-Check-Act</div></div>
+                    </div>
+                    <div class="case-card fragment-left">
+                        <div class="case-header"><span class="case-title">SPORTS CASE STUDY</span><span class="text-xs font-bold text-slate-400">边际收益 (Marginal Gains)</span></div>
+                        <div class="v-comp"><div class="loop-text">∞</div></div>
+                        <div class="mt-6 text-xs text-slate-500 font-medium text-center"><p>英国自行车队通过优化枕头、洗手液等数百个细节，<br>从百年无冠变成奥运霸主。</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">CONSENSUS</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">STRATEGIC CONSENSUS</span></div>
+                <h1 class="main-title-center">思想升华：<span class="highlight-mark-center">四大共识</span></h1>
+            </div>
+            <div class="flex flex-col items-center justify-center h-full text-center px-20 relative z-10 w-full quote-box">
+                <div class="relative text-[42px] text-slate-400 font-bold mb-10 inline-block px-4">
+                    "做精益，那是精益部门的事儿！"
+                    <div class="strike-line"></div>
+                    <div class="no-stamp">NO!</div>
+                </div>
+                <div class="fragment w-full consensus-content">
+                    <div class="max-w-5xl mx-auto border-t border-slate-200 pt-8">
+                        <h3 class="text-[48px] font-black text-[#003399] mb-4 tracking-tight">全员贯彻 · 协同作战</h3>
+                        <p class="text-[22px] text-slate-700 leading-[1.6] font-medium whitespace-nowrap">精益是企业卓越经营的必经之路。只有打破部门墙，全员参与，才能真正重塑创新型工厂的底层竞争力。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">CONSENSUS</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">STRATEGIC CONSENSUS</span></div>
+                <h1 class="main-title-center">思想升华：<span class="highlight-mark-center">四大共识</span></h1>
+            </div>
+            <div class="flex flex-col items-center justify-center h-full text-center px-20 relative z-10 w-full quote-box">
+                <div class="relative text-[42px] text-slate-400 font-bold mb-10 inline-block px-4">
+                    "精益是一套简单工具或一次性活动！"
+                    <div class="strike-line"></div>
+                    <div class="no-stamp">NO!</div>
+                </div>
+                <div class="fragment w-full consensus-content">
+                    <div class="max-w-6xl mx-auto border-t border-slate-200 pt-8">
+                        <h3 class="text-[48px] font-black text-[#003399] mb-4 tracking-tight">深刻的管理哲学</h3>
+                        <p class="text-[22px] text-slate-700 leading-[1.6] font-medium whitespace-nowrap">精益绝非生搬硬套的工具包，而是推动组织文化转型的强大引擎，是必须深植于企业基因的底层思维。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">CONSENSUS</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">STRATEGIC CONSENSUS</span></div>
+                <h1 class="main-title-center">思想升华：<span class="highlight-mark-center">四大共识</span></h1>
+            </div>
+            <div class="flex flex-col items-center justify-center h-full text-center px-20 relative z-10 w-full quote-box">
+                <div class="relative text-[42px] text-slate-400 font-bold mb-10 inline-block px-4">
+                    "认可精益，但我有自己的独特见解"
+                    <div class="strike-line"></div>
+                    <div class="no-stamp">NO!</div>
+                </div>
+                <div class="fragment w-full consensus-content">
+                    <div class="max-w-5xl mx-auto border-t border-slate-200 pt-8">
+                        <h3 class="text-[48px] font-black text-[#003399] mb-4 tracking-tight">规范先行 · 坚决落地</h3>
+                        <p class="text-[22px] text-slate-700 leading-[1.6] font-medium whitespace-nowrap">战略落地三步走：第一阶段「听话照做」，第二阶段「打通拉平」，第三阶段才能「增效升值」。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="bg-watermark">CONSENSUS</div>
+            <div class="header-center slide-header-anim">
+                <div><span class="top-tag">STRATEGIC CONSENSUS</span></div>
+                <h1 class="main-title-center">思想升华：<span class="highlight-mark-center">四大共识</span></h1>
+            </div>
+            <div class="flex flex-col items-center justify-center h-full text-center px-20 relative z-10 w-full quote-box">
+                <div class="relative text-[38px] text-slate-400 font-bold mb-10 inline-block px-4">
+                    "没立刻显示出降本增效，不如不做！"
+                    <div class="strike-line"></div>
+                    <div class="no-stamp">NO!</div>
+                </div>
+                <div class="fragment w-full consensus-content">
+                    <div class="max-w-[1200px] mx-auto border-t border-slate-200 pt-8">
+                        <h3 class="text-[48px] font-black text-[#003399] mb-4 tracking-tight">长期主义的「价值税」</h3>
+                        <p class="text-[22px] text-slate-700 leading-[1.6] font-medium whitespace-nowrap">精益不是立竿见影的特效药。它是为了构建一个能够自我诊断、自我调节、自我完善的卓越健康生态。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide">
+            <div class="flex flex-col items-center justify-center h-full text-center relative z-10 fragment">
+                <h2 class="text-[64px] font-black text-[#003399] tracking-widest mb-6">做“难而正确”的事。</h2>
+                <div class="relative inline-block mt-4">
+                    <h1 class="text-[120px] font-black text-[#0F172A] tracking-widest leading-none relative z-10">我们在路上了！</h1>
+                    <div class="absolute bottom-4 left-0 w-full h-8 bg-yellow-400 opacity-60 z-0 transform -skew-x-12"></div>
+                </div>
+            </div>
+            <div class="footer-bar"><div class="text-xl font-black text-[#003399] tracking-tight uppercase" style="font-family: 'Inter', sans-serif;">LEAN INNOVATION</div><div class="flex items-baseline text-sm text-[#475569] font-bold tracking-wide"><span>让</span><span class="mx-1 text-xl font-black italic bg-clip-text text-transparent bg-gradient-to-br from-[#003399] via-[#0044AA] to-[#FACC15]">AI</span><span>更有温度</span><span class="mx-3 text-slate-400 font-bold">·</span><span>让制造更有速度</span></div></div>
+        </div>
+
+        <div class="slide bg-white">
+            <div class="marquee-wrapper top"><div class="marquee-inner">LEAN INNOVATION SYSTEM · LEAN INNOVATION SYSTEM · LEAN INNOVATION SYSTEM · </div></div>
+            <div class="marquee-wrapper bottom"><div class="marquee-inner">AI EMPOWERMENT · DIGITAL TRANSFORMATION · AI EMPOWERMENT · DIGITAL TRANSFORMATION · </div></div>
+
+            <div style="text-align: center; z-index: 2; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                <h1 style="font-size: 100px; font-weight: 900; color: var(--primary-blue); margin-bottom: 20px;">感谢聆听</h1>
+                <div style="font-size: 28px; color: var(--text-gray); margin-bottom: 60px;">敬请批评指正 · Q & A</div>
+                <div style="font-size: 20px; color: var(--text-dark); margin-bottom: 50px; font-weight: 600;">汇报人：陈云 | 2026年</div>
+                <div style="display: inline-block; padding: 18px 45px; background: var(--white); color: var(--primary-blue); font-size: 20px; font-weight: 700; letter-spacing: 3px; border: 2px solid var(--primary-blue); margin: 0 auto; box-shadow: 8px 8px 0 var(--accent-yellow);">让 AI 更有温度 让制造更有速度</div>
+            </div>
+        </div>
+        
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <script>
+        class Presentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.totalSlides = this.slides.length;
+                this.isAnimating = false;
+                this.init();
+            }
+
+            init() {
+                this.resetFragments();
+                this.updateSlideClasses();
+                this.addEventListeners();
+            }
+
+            resetFragments() {
+                this.slides.forEach(slide => {
+                    const fragments = slide.querySelectorAll('.fragment, .fragment-left');
+                    fragments.forEach(f => f.classList.remove('visible'));
+                });
+            }
+
+            addEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (this.isAnimating || e.target.closest('button, select, a')) return;
+
+                    // 下一步 (翻页笔/空格/回车/右/下/PageDown)
+                    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) {
+                        e.preventDefault(); this.stepForward();
+                    } 
+                    // 上一步 (退格/左/上/PageUp)
+                    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) {
+                        e.preventDefault(); this.stepBackward();
+                    } 
+                    // 全屏
+                    else if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault(); this.toggleFullscreen();
+                    }
+                });
+            }
+
+            stepForward() {
+                const current = this.slides[this.currentSlide];
+                const hiddenFragments = Array.from(current.querySelectorAll('.fragment:not(.visible), .fragment-left:not(.visible)'));
+                
+                if (hiddenFragments.length > 0) {
+                    hiddenFragments[0].classList.add('visible');
+                } else {
+                    if (this.currentSlide < this.totalSlides - 1) {
+                        this.changeSlide(this.currentSlide + 1);
+                    }
+                }
+            }
+
+            stepBackward() {
+                const current = this.slides[this.currentSlide];
+                const visibleFragments = Array.from(current.querySelectorAll('.fragment.visible, .fragment-left.visible'));
+                
+                if (visibleFragments.length > 0) {
+                    visibleFragments[visibleFragments.length - 1].classList.remove('visible');
+                } else {
+                    if (this.currentSlide > 0) {
+                        this.changeSlide(this.currentSlide - 1);
+                    }
+                }
+            }
+
+            changeSlide(newIndex) {
+                this.isAnimating = true;
+                this.currentSlide = newIndex;
+                
+                this.slides.forEach((slide, index) => {
+                    slide.classList.remove('active', 'prev');
+                    if (index === this.currentSlide) {
+                        slide.classList.add('active');
+                        // 重置碎片，纯手动控制
+                        const fragments = slide.querySelectorAll('.fragment, .fragment-left');
+                        fragments.forEach(f => f.classList.remove('visible'));
+                    } else if (index < this.currentSlide) {
+                        slide.classList.add('prev');
+                    }
+                });
+                
+                this.updateProgress();
+                // 冷却防抖，阻断高频连按
+                setTimeout(() => { this.isAnimating = false; }, 800);
+            }
+
+            updateSlideClasses() { 
+                this.changeSlide(this.currentSlide); 
+            }
+
+            updateProgress() {
+                const progress = ((this.currentSlide + 1) / this.totalSlides) * 100;
+                const pb = document.getElementById('progressBar');
+                if (pb) {
+                    pb.style.width = progress + '%';
+                }
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) { 
+                    return document.documentElement.requestFullscreen(); 
+                } else { 
+                    if (document.exitFullscreen) { return document.exitFullscreen(); } 
+                }
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const presentation = new Presentation();
+            const selector = document.getElementById('report-page');
+            const prev = document.getElementById('report-prev');
+            const next = document.getElementById('report-next');
+            presentation.slides.forEach((slide, index) => {
+                const option = document.createElement('option');
+                option.value = String(index);
+                option.textContent = `${index + 1} / ${presentation.totalSlides}`;
+                selector.append(option);
+            });
+            const update = presentation.updateProgress.bind(presentation);
+            presentation.updateProgress = () => {
+                update();
+                selector.value = String(presentation.currentSlide);
+                prev.disabled = presentation.currentSlide === 0;
+                next.disabled = presentation.currentSlide === presentation.totalSlides - 1;
+            };
+            prev.onclick = () => presentation.changeSlide(Math.max(0, presentation.currentSlide - 1));
+            next.onclick = () => presentation.changeSlide(Math.min(presentation.totalSlides - 1, presentation.currentSlide + 1));
+            selector.onchange = () => presentation.changeSlide(Number(selector.value));
+            document.getElementById('report-step').onclick = () => {
+                if (!presentation.isAnimating) presentation.stepForward();
+            };
+            document.getElementById('report-fullscreen').onclick = async () => {
+                try { await presentation.toggleFullscreen(); }
+                catch { document.getElementById('report-fullscreen').textContent = '请横屏查看'; }
+            };
+            const resize = () => document.documentElement.style.setProperty('--report-scale', Math.min(1, innerWidth / 1280, Math.max(1, innerHeight - document.querySelector('.report-controls').offsetHeight - 32) / 720));
+            window.addEventListener('resize', resize);
+            presentation.updateProgress();
+            resize();
+        });
+    </script>
+</body>
+</html>
