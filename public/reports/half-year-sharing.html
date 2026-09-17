@@ -73,14 +73,9 @@ body.is-cinema #cinema-fx .bar.top,body.is-cinema #cinema-fx .bar.bottom{animati
   #cinema-fx *{animation-duration:.18s!important;}
 }
 
-.stage{inset:0 0 72px;height:calc(100% - 72px)}
-.report-controls{position:fixed;bottom:0;left:0;right:0;height:72px;z-index:100;display:flex;align-items:center;justify-content:center;gap:14px;color:#e4e4e7;background:#121517;border-top:1px solid #ffffff20;font:14px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
-.report-controls button,.report-controls a,.report-controls select{background:#252b2d;color:inherit;border:1px solid #ffffff25;border-radius:9px;padding:9px 12px;text-decoration:none;font:inherit}
-.report-controls button{cursor:pointer}.report-controls button:disabled{opacity:.35;cursor:default}.report-controls button:hover{border-color:#e9c75a}.report-controls select{max-width:240px}
-@media(max-width:600px){.report-controls{gap:6px;font-size:12px}.report-controls button,.report-controls a,.report-controls select{padding:8px}.report-controls select{max-width:112px}.report-hint{display:none}}
 </style>
 </head>
-<body><nav class="report-controls" aria-label="汇报翻页"><a href="/training#reports">返回培训</a><button id="prev" type="button">上一页</button><select id="page-select" aria-label="选择汇报章节"></select><button id="next" type="button">下一页</button><button id="fullscreen" type="button">全屏</button><span class="report-hint">点击画面逐步演示</span></nav>
+<body>
 <iframe title="汇报演示画面" id="stage-a" class="stage is-active" style="z-index:2" title="汇报演示" allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 <iframe title="汇报预载画面" id="stage-b" class="stage" style="z-index:1" title="汇报演示预载" allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 <div id="cinema-fx" aria-hidden="true">
@@ -101,6 +96,14 @@ let index=0;
 let navToken=0;
 let observer=null;
 let switching=false;
+let fullscreenRequested=false;
+function enterFullscreen(){
+  if(fullscreenRequested) return;
+  fullscreenRequested=true;
+  if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }
+}
 
 
 // 页与页之间的转场编排。索引代表“进入的页面”：
@@ -190,6 +193,8 @@ function attachActive(frame,pageIndex,token){
   const d=frame.contentDocument;
   if(!w || !d) return;
 
+  w.addEventListener('click',enterFullscreen,{capture:true});
+
   // Previous-page support only; forward actions remain entirely controlled by each original page.
   w.addEventListener('keydown',(e)=>{
     if(e.key==='ArrowLeft' && pageIndex>0){
@@ -247,7 +252,6 @@ function swapTo(slot,newIndex,token){
     document.body.classList.remove('is-cinema');
     activeSlot=slot;
     index=newIndex;
-    updateControls();
     switching=false;
     attachActive(incoming,newIndex,token);
     warmNext();
@@ -305,16 +309,6 @@ function start(){
 }
 
 
-const titles=['封面','引言','背景与规则','五重关卡','过渡期挑战','接手与破局','沟通与答疑','沉淀成方法','团队建议','后续打算','成长与致谢'];
-const selector=document.getElementById('page-select');
-titles.forEach((title,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=`${i+1} / ${pages.length} · ${title}`;selector.append(option)});
-function updateControls(){selector.value=String(index);document.getElementById('prev').disabled=index===0;document.getElementById('next').disabled=index===pages.length-1;}
-document.getElementById('prev').onclick=()=>goDirect(index-1);
-document.getElementById('next').onclick=()=>goDirect(index+1);
-selector.onchange=()=>{goDirect(Number(selector.value));selector.value=String(index)};
-document.getElementById('fullscreen').onclick=async()=>{try{if(document.fullscreenElement) await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{document.getElementById('fullscreen').textContent='请横屏查看'}};
-document.addEventListener('fullscreenchange',()=>{document.getElementById('fullscreen').textContent=document.fullscreenElement?'退出全屏':'全屏'});
-updateControls();
 
 start();
 })();

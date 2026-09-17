@@ -186,15 +186,11 @@
 
     </style>
 <style>
-body { padding-bottom: 72px; box-sizing: border-box; background: #10191a; }
+html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background: #10191a; }
 .presentation-wrapper { flex-shrink: 0; transform: scale(var(--report-scale, 1)); }
-.report-controls { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; gap: 8px; width: max-content; max-width: calc(100% - 16px); flex-wrap: wrap; justify-content: center; padding: 10px; border-radius: 16px; background: #142c2c; color: white; font: 13px sans-serif; }
-.report-controls a, .report-controls button, .report-controls select { padding: 7px 9px; border-radius: 8px; background: #263e3e; color: white; border: 1px solid #526464; }
-.report-controls button:disabled { opacity: .4; }
 </style>
 </head>
 <body>
-<nav class="report-controls" aria-label="汇报翻页"><a href="/training#reports">返回培训</a><button id="report-prev" type="button">上一页</button><select id="report-page" aria-label="选择汇报章节"></select><button id="report-next" type="button">下一页</button><button id="report-step" type="button">下一步</button><button id="report-fullscreen" type="button">全屏</button></nav>
     <div class="presentation-wrapper">
         <div class="progress-bar" id="progressBar"></div>
 
@@ -1101,35 +1097,16 @@ body { padding-bottom: 72px; box-sizing: border-box; background: #10191a; }
 
         window.addEventListener('load', () => {
             const presentation = new Presentation();
-            const selector = document.getElementById('report-page');
-            const prev = document.getElementById('report-prev');
-            const next = document.getElementById('report-next');
-            presentation.slides.forEach((slide, index) => {
-                const option = document.createElement('option');
-                option.value = String(index);
-                option.textContent = `${index + 1} / ${presentation.totalSlides}`;
-                selector.append(option);
-            });
-            const update = presentation.updateProgress.bind(presentation);
-            presentation.updateProgress = () => {
-                update();
-                selector.value = String(presentation.currentSlide);
-                prev.disabled = presentation.currentSlide === 0;
-                next.disabled = presentation.currentSlide === presentation.totalSlides - 1;
-            };
-            prev.onclick = () => presentation.changeSlide(Math.max(0, presentation.currentSlide - 1));
-            next.onclick = () => presentation.changeSlide(Math.min(presentation.totalSlides - 1, presentation.currentSlide + 1));
-            selector.onchange = () => presentation.changeSlide(Number(selector.value));
-            document.getElementById('report-step').onclick = () => {
+            document.addEventListener('click', () => {
                 if (!presentation.isAnimating) presentation.stepForward();
-            };
-            document.getElementById('report-fullscreen').onclick = async () => {
-                try { await presentation.toggleFullscreen(); }
-                catch { document.getElementById('report-fullscreen').textContent = '请横屏查看'; }
-            };
-            const resize = () => document.documentElement.style.setProperty('--report-scale', Math.min(1, innerWidth / 1280, Math.max(1, innerHeight - document.querySelector('.report-controls').offsetHeight - 32) / 720));
+            });
+            document.addEventListener('click', () => {
+                if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                }
+            }, { once: true });
+            const resize = () => document.documentElement.style.setProperty('--report-scale', Math.min(innerWidth / 1280, innerHeight / 720));
             window.addEventListener('resize', resize);
-            presentation.updateProgress();
             resize();
         });
     </script>
