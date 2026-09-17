@@ -22,9 +22,10 @@ export function SubscribeForm() {
         body: JSON.stringify({ email }),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const result = await res.json()
       setStatus('success')
       setEmail('')
-      setMessage('订阅成功！请到邮箱点击确认邮件完成订阅～')
+      setMessage(result.status === 'already_subscribed' ? '这个邮箱已经完成订阅，无需重复确认。' : '确认邮件已发送，请到邮箱点击链接完成订阅。')
     } catch {
       setStatus('error')
       setMessage('订阅失败，请稍后再试或换个邮箱')

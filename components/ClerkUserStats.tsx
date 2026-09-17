@@ -24,26 +24,35 @@ export function ClerkUserStats({ render, fallback }: UserStatsProps) {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('/api/clerk-users')
+        const response = await fetch('/api/clerk-users', { cache: 'no-store' })
         if (response.ok) {
           const data = await response.json() as { users: ClerkUser[], totalCount: number }
           // 直接使用 API 返回的数据
           setUsers(data.users || [])
           // 使用 totalCount 或 users.length 作为真实人数
-          setTotalUsers(data.totalCount || data.users?.length || 0)
+          setTotalUsers(data.totalCount ?? data.users?.length ?? 0)
         } else {
           console.error('Failed to fetch users:', response.status)
-          setTotalUsers(0)
+
         }
       } catch (error) {
         console.error('Error fetching users:', error)
-        setTotalUsers(0)
+
       } finally {
         setLoading(false)
       }
     }
 
     void fetchUsers()
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') void fetchUsers()
+    }, 30000)
+    const refresh = () => { void fetchUsers() }
+    window.addEventListener('focus', refresh)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', refresh)
+    }
   }, [])
 
   if (loading) {

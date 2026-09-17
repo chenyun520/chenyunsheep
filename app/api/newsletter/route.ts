@@ -8,7 +8,6 @@ import { db } from '~/db'
 import { subscribers } from '~/db/schema'
 import ConfirmSubscriptionEmail from '~/emails/ConfirmSubscription'
 import { env } from '~/env.mjs'
-import { url } from '~/lib'
 import { resend } from '~/lib/mail'
 import { redis } from '~/lib/redis'
 
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     if (subscriber) {
       if (subscriber.subscribedAt) {
-        return NextResponse.json({ status: 'success' })
+        return NextResponse.json({ status: 'already_subscribed' })
       }
 
       // 未确认订阅者：重生成 token 并重发确认邮件（仅生产发信）
@@ -53,14 +52,15 @@ export async function POST(req: NextRequest) {
         .where(eq(subscribers.email, parsed.email))
 
       if (env.NODE_ENV === 'production') {
-        await resend.emails.send({
+        const result = await resend.emails.send({
           from: emailConfig.from,
           to: parsed.email,
           subject: '来自 Chenyun 的订阅确认',
           react: ConfirmSubscriptionEmail({
-            link: url(`confirm/${newToken}`).href,
+            link: new URL(`confirm/${newToken}`, 'https://www.chenyunsheep.top/').href,
           }),
         })
+        if (result.error || !result.data?.id) throw new Error(result.error?.message ?? 'Email not accepted')
       }
 
       return NextResponse.json({ status: 'success' })
@@ -79,14 +79,15 @@ export async function POST(req: NextRequest) {
       .onConflictDoNothing()
 
     if (env.NODE_ENV === 'production') {
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from: emailConfig.from,
         to: parsed.email,
         subject: '来自 Chenyun 的订阅确认',
         react: ConfirmSubscriptionEmail({
-          link: url(`confirm/${token}`).href,
+          link: new URL(`confirm/${token}`, 'https://www.chenyunsheep.top/').href,
         }),
       })
+      if (result.error || !result.data?.id) throw new Error(result.error?.message ?? 'Email not accepted')
     }
 
     return NextResponse.json({ status: 'success' })

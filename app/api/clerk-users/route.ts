@@ -1,53 +1,35 @@
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const secretKey = process.env.CLERK_SECRET_KEY
-
-    if (!secretKey) {
-      console.error('CLERK_SECRET_KEY not configured')
-      return NextResponse.json(
-        { error: 'Clerk secret key not configured', users: [], totalCount: 0 },
-        { status: 500 }
-      )
+    if (!secretKey) throw new Error('Clerk is not configured')
+    const options = {
+      headers: { Authorization: `Bearer ${secretKey}` },
+      cache: 'no-store' as const,
     }
-
-    // Fetch users from Clerk API with count
-    const response = await fetch('https://api.clerk.com/v1/users?limit=100&order_by=-created_at&count=true', {
-      headers: {
-        'Authorization': `Bearer ${secretKey}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Clerk API error:', response.status, errorText)
-      return NextResponse.json(
-        { error: 'Failed to fetch users from Clerk', users: [], totalCount: 0 },
-        { status: response.status }
-      )
+    const [usersResponse, countResponse] = await Promise.all([
+      fetch('https://api.clerk.com/v1/users?limit=4&order_by=-created_at', options),
+      fetch('https://api.clerk.com/v1/users/count', options),
+    ])
+    if (!usersResponse.ok || !countResponse.ok) {
+      throw new Error('Failed to fetch community statistics')
     }
-
-    const data = await response.json()
-
-    // Clerk API returns: { data: [...], totalCount: number }
-    const users = Array.isArray(data) ? data : (data?.data || [])
-    // totalCount is returned directly by Clerk API when count=true
-    const totalCount = data?.totalCount ?? data?.total_count ?? users.length
-
-    console.log('Clerk API response - users count:', users.length, 'totalCount:', totalCount)
-
-    // Return only the data we need
+    const users = await usersResponse.json()
+    const { total_count: totalCount } = await countResponse.json()
     return NextResponse.json({
-      users,
+      users: users.map((user: { id: string; first_name: string; last_name: string; image_url: string }) => ({
+        id: user.id,
+        first_name: user.first_name,
+        full_name: [user.first_name, user.last_name].filter(Boolean).join(' '),
+        image_url: user.image_url,
+      })),
       totalCount,
-    })
+    }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
-    console.error('Error fetching Clerk users:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', users: [], totalCount: 0 },
-      { status: 500 }
-    )
+    console.error('[Community statistics]', error)
+    return NextResponse.json({ error: '暂时无法获取社区人数' }, { status: 503 })
   }
 }
