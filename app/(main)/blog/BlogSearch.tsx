@@ -71,13 +71,14 @@ export function BlogSearch() {
         </svg>
         <input
           ref={inputRef}
-          type="text"
+          type="search"
+          aria-label="搜索文章标题或内容"
           value={value}
           onChange={onChange}
           placeholder="搜索文章标题或内容..."
           className={clsxm(
-            'w-full pl-10 pr-10 py-2.5 rounded-xl text-sm',
-            'bg-white border border-zinc-200 shadow-sm',
+            'w-full min-h-[48px] pl-10 pr-10 py-3 rounded-2xl text-sm',
+            'bg-zinc-50 border border-zinc-200',
             'placeholder:text-zinc-400 text-zinc-800',
             'focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500',
             'transition-all duration-200',
@@ -89,6 +90,7 @@ export function BlogSearch() {
           <button
             type="button"
             onClick={onClear}
+            aria-label="清除搜索"
             className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
           >
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,6 +107,7 @@ export function BlogSearch() {
           <button
             type="button"
             onClick={onClear}
+            aria-label="清除搜索"
             className="text-xs text-lime-600 dark:text-lime-400 hover:underline"
           >
             清除搜索

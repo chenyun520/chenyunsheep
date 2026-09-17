@@ -38,7 +38,7 @@ export function BlogCategories({ categories }: BlogCategoriesProps) {
   ]
 
   return (
-    <div className="mb-10">
+    <div>
       {/* 分类标签 - 全新设计 */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
@@ -66,15 +66,16 @@ export function BlogCategories({ categories }: BlogCategoriesProps) {
               >
                 <Link
                   href={createCategoryUrl(category.slug)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={clsxm(
-                    'relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300',
-                    'border shadow-sm text-black',
+                    'relative inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
+                    'border',
                     // 未选中状态
                     !isActive &&
-                      'bg-white border-zinc-200 shadow-zinc-100/50 hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md dark:bg-zinc-800 dark:border-zinc-700 dark:shadow-zinc-900/20 dark:hover:bg-zinc-700 dark:hover:border-zinc-600',
-                    // 选中状态 - 绿色渐变背景，但文字还是黑色
+                      'border-zinc-200 bg-zinc-50 text-zinc-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950 dark:hover:text-emerald-200',
+                    // 选中状态
                     isActive &&
-                      'bg-gradient-to-r from-emerald-450 to-lime-500 border-transparent shadow-lg shadow-emerald-500/25'
+                      'border-emerald-700 bg-emerald-700 text-white dark:border-emerald-400 dark:bg-emerald-400 dark:text-emerald-950'
                   )}
                 >
                   {/* 分类名称 */}

@@ -55,20 +55,40 @@ export default async function BlogPage({
         </p>
       </header>
 
-      {/* 搜索框 */}
-      <Suspense fallback={<div className="h-12" />}>
-        <BlogSearch />
-      </Suspense>
+      <section
+        aria-label="文章搜索与分类"
+        className="mt-10 rounded-3xl border border-zinc-200/80 bg-white/80 p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 sm:p-7"
+      >
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+          <div className="shrink-0">
+            <h2 className="text-base font-semibold text-zinc-800 dark:text-zinc-100">
+              探索文章
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              找到你感兴趣的内容
+            </p>
+          </div>
+          <div className="w-full sm:max-w-md">
+            <Suspense fallback={<div className="h-12" />}>
+              <BlogSearch />
+            </Suspense>
+          </div>
+        </div>
 
-      {/* 分类筛选器 - 搜索时隐藏 */}
-      {!searchQuery && (
-        <Suspense fallback={<div className="h-20" />}>
-          <BlogCategories categories={categories} />
-        </Suspense>
-      )}
+        {!searchQuery && (
+          <div className="mt-6 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+            <p className="mb-3 text-xs font-medium tracking-wider text-zinc-500 dark:text-zinc-400">
+              文章分类
+            </p>
+            <Suspense fallback={<div className="h-11" />}>
+              <BlogCategories categories={categories} />
+            </Suspense>
+          </div>
+        )}
+      </section>
 
       {/* 博客文章列表 */}
-      <div className="mt-12 grid grid-cols-1 gap-6 sm:mt-20 lg:grid-cols-2 lg:gap-8">
+      <div className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 lg:grid-cols-2 lg:gap-8">
         <Suspense fallback={<div>加载中...</div>}>
           <BlogPostsByCategory
             selectedCategory={selectedCategory}
